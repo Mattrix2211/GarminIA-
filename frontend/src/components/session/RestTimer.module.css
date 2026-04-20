@@ -1,0 +1,97 @@
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 280px;
+}
+
+.circle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time {
+  position: absolute;
+  font-size: 3.5rem;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.unit {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btnMain {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0f0f0f;
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnControl {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.presets {
+  display: flex;
+  gap: 8px;
+}
+
+.preset {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  transition: all 0.2s;
+}
+
+.presetActive {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200, 240, 100, 0.08);
+}
+
+.skipText {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  text-decoration: underline;
+}

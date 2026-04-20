@@ -1,0 +1,295 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+.drawer {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 12px 20px 32px;
+  max-height: 88dvh;
+  overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%) }
+  to { transform: translateY(0) }
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 0 auto 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.badgeEquip {
+  color: var(--accent);
+  background: rgba(200, 240, 100, 0.08);
+}
+
+.closeBtn {
+  color: var(--text-muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* Zone GIF */
+.gifArea {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gif {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gifPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.diagramEmoji {
+  font-size: 3.5rem;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1) }
+  50% { transform: scale(1.15) }
+}
+
+.diagramPulse {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: pulse 2s ease-out infinite;
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 0.6 }
+  100% { transform: scale(2); opacity: 0 }
+}
+
+.diagramLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.tab {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.tabActive {
+  background: rgba(200, 240, 100, 0.12);
+  color: var(--accent);
+}
+
+.tabContent {
+  min-height: 160px;
+}
+
+/* Instructions */
+.instructionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.instructionItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.stepNum {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(200, 240, 100, 0.15);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.instructionItem span:last-child {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding-top: 3px;
+}
+
+/* Muscles */
+.musclesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.muscleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.muscleGroupLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.muscleTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.muscleTag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.8rem;
+}
+
+/* Tips */
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tipItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tipIcon {
+  color: var(--accent);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.tipItem span:last-child {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* No info */
+.noInfo {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.noInfo p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+}
+
+.noInfoSub {
+  color: var(--text-muted) !important;
+  font-size: 0.8rem !important;
+}

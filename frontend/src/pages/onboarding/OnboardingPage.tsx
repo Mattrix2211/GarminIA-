@@ -2,17 +2,28 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { apiPost } from '@/lib/api'
+import { GarminOnboardingGuide } from '@/components/garmin/GarminOnboardingGuide'
 import styles from './OnboardingPage.module.css'
 
 const SPORTS = ['Triathlon', 'Cyclisme', 'Course à pied', 'Trail', 'Natation', 'Musculation', 'CrossFit', 'Sport collectif', 'Autre']
 const LEVELS = [
-  { value: 'beginner', label: 'Débutant' },
-  { value: 'intermediate', label: 'Intermédiaire' },
-  { value: 'advanced', label: 'Avancé' },
-  { value: 'competitor', label: 'Compétiteur' },
+  { value: 'beginner', label: 'Débutant', desc: 'Je débute ou reprends le sport' },
+  { value: 'intermediate', label: 'Intermédiaire', desc: '2–4 séances/sem, quelques années d\'expérience' },
+  { value: 'advanced', label: 'Avancé', desc: '5+ séances/sem, objectifs exigeants' },
+  { value: 'competitor', label: 'Compétiteur', desc: 'Je participe à des compétitions régulières' },
 ]
 const GOALS = ['Perte de poids', 'Amélioration des performances', 'Préparation compétition', 'Santé générale', 'Prise de masse']
-const DEVICES = ['Garmin', 'Wahoo', 'Apple Health', 'Polar', 'Suunto', 'Whoop', 'Oura Ring', 'Saisie manuelle']
+
+const DEVICES: { id: string; label: string; icon: string; desc: string }[] = [
+  { id: 'Garmin', label: 'Garmin', icon: '⌚', desc: 'HRV, Body Battery, sommeil, activités' },
+  { id: 'Wahoo', label: 'Wahoo', icon: '🚴', desc: 'Home trainer, puissance, capteurs' },
+  { id: 'Apple Health', label: 'Apple Health', icon: '🍎', desc: 'Activités iOS, fréquence cardiaque' },
+  { id: 'Polar', label: 'Polar', icon: '📡', desc: 'HRV, FC, activités Polar' },
+  { id: 'Suunto', label: 'Suunto', icon: '🔵', desc: 'Activités Suunto' },
+  { id: 'Whoop', label: 'Whoop', icon: '💪', desc: 'Récupération, sommeil, HRV' },
+  { id: 'Oura Ring', label: 'Oura Ring', icon: '💍', desc: 'HRV, sommeil, score de préparation' },
+  { id: 'Saisie manuelle', label: 'Manuel', icon: '✏️', desc: 'Saisie manuelle des données' },
+]
 
 interface FormData {
   firstName: string
@@ -31,6 +42,7 @@ export function OnboardingPage() {
   const { user } = useAuthStore()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [garminConnected, setGarminConnected] = useState(false)
   const [form, setForm] = useState<FormData>({
     firstName: '', age: '', weightKg: '', heightCm: '',
     sports: [], level: '', goals: [], targetCompetitionDate: '', devices: [],
@@ -55,6 +67,9 @@ export function OnboardingPage() {
     })
     navigate('/')
   }
+
+  const hasGarmin = form.devices.includes('Garmin')
+  const showGarminGuide = step === 5 && hasGarmin
 
   return (
     <div className={styles.container}>
@@ -122,7 +137,8 @@ export function OnboardingPage() {
                   className={`${styles.levelCard} ${form.level === lvl.value ? styles.selected : ''}`}
                   onClick={() => setForm(f => ({ ...f, level: lvl.value }))}
                 >
-                  {lvl.label}
+                  <span className={styles.levelLabel}>{lvl.label}</span>
+                  <span className={styles.levelDesc}>{lvl.desc}</span>
                 </button>
               ))}
             </div>
@@ -161,19 +177,42 @@ export function OnboardingPage() {
         {step === 5 && (
           <div className={styles.step}>
             <h2>Tes appareils</h2>
-            <p className={styles.hint}>Tu pourras configurer les connexions après</p>
-            <div className={styles.chips}>
-              {DEVICES.map(device => (
-                <button
-                  key={device}
-                  type="button"
-                  className={`${styles.chip} ${form.devices.includes(device) ? styles.selected : ''}`}
-                  onClick={() => toggleArray('devices', device)}
-                >
-                  {device}
-                </button>
-              ))}
-            </div>
+            <p className={styles.hint}>Connecte tes appareils pour une analyse complète</p>
+
+            {!showGarminGuide ? (
+              <div className={styles.deviceGrid}>
+                {DEVICES.map(device => (
+                  <button
+                    key={device.id}
+                    type="button"
+                    className={`${styles.deviceCard} ${form.devices.includes(device.id) ? styles.selected : ''}`}
+                    onClick={() => toggleArray('devices', device.id)}
+                  >
+                    <span className={styles.deviceIcon}>{device.icon}</span>
+                    <span className={styles.deviceName}>{device.label}</span>
+                    <span className={styles.deviceDesc}>{device.desc}</span>
+                    {form.devices.includes(device.id) && (
+                      <span className={styles.deviceCheck}>✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ marginTop: 8 }}>
+                <GarminOnboardingGuide
+                  onConnected={() => setGarminConnected(true)}
+                  onSkip={() => { /* garmin skipped */ }}
+                />
+              </div>
+            )}
+
+            {hasGarmin && !showGarminGuide && (
+              <button
+                className={styles.garminGuideBtn}
+                onClick={() => setForm(f => ({ ...f }))}
+                style={{ display: 'none' }}
+              />
+            )}
           </div>
         )}
       </div>
@@ -188,9 +227,13 @@ export function OnboardingPage() {
           <button className={styles.btnPrimary} onClick={() => setStep(s => s + 1)}>
             Suivant
           </button>
+        ) : showGarminGuide && !garminConnected ? (
+          <button className={styles.btnPrimary} onClick={handleFinish} disabled={loading}>
+            {loading ? 'Enregistrement…' : 'Terminer sans connecter →'}
+          </button>
         ) : (
           <button className={styles.btnPrimary} onClick={handleFinish} disabled={loading}>
-            {loading ? 'Enregistrement…' : 'Commencer'}
+            {loading ? 'Enregistrement…' : 'Commencer ✓'}
           </button>
         )}
       </div>

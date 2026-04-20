@@ -48,6 +48,24 @@
 .exerciseName {
   font-size: 2rem;
   line-height: 1.15;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ficheHint {
+  font-size: 0.9rem;
+  color: var(--accent);
+  opacity: 0.7;
+  font-family: var(--font-body);
 }
 
 .exerciseMeta {

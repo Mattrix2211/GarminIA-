@@ -1,0 +1,191 @@
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stepperHeader {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.stepBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.stepBtnActive {
+  border-color: var(--accent);
+  background: rgba(200, 240, 100, 0.12);
+  color: var(--accent);
+}
+
+.stepBtnDone {
+  border-color: var(--success);
+  background: rgba(85, 204, 136, 0.12);
+  color: var(--success);
+}
+
+.stepNum {
+  line-height: 1;
+}
+
+.stepContent {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  min-height: 200px;
+}
+
+.stepIcon {
+  font-size: 2.5rem;
+}
+
+.stepTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.stepDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.qrBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.qrBox {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.qrSvg {
+  width: 80px;
+  height: 80px;
+}
+
+.qrLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.connectBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.errorMsg {
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.helpBox {
+  background: rgba(255, 170, 51, 0.08);
+  border: 1px solid rgba(255, 170, 51, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.helpBox p {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--warning);
+}
+
+.helpBox p:last-child {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.navRow {
+  display: flex;
+  gap: 12px;
+}
+
+.navPrimary {
+  flex: 1;
+  background: var(--accent);
+  color: #0f0f0f;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+}
+
+.navSecondary {
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.navSkip {
+  flex: 1;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 32px 0;
+}
+
+.successIcon {
+  font-size: 3rem;
+}
+
+.success h3 {
+  font-size: 1.25rem;
+  color: var(--success);
+  margin: 0;
+}
+
+.success p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}

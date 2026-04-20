@@ -21,6 +21,10 @@ function demoResponse<T>(path: string): T | null {
   if (path === '/api/dashboard/today') return demoDaily as T
   if (path === '/api/dashboard/sessions-today') return demoSessions as T
   if (path === '/api/garmin/status') return { connected: true, lastSync: new Date().toISOString() } as T
+  if (path === '/api/wahoo/status') return { connected: false, lastSync: null } as T
+  if (path === '/api/apple/status') return { connected: false, lastSync: null } as T
+  if (path === '/api/push/vapid-key') return { vapidKey: '' } as T
+  if (path === '/api/wahoo/oauth/start') return { authorizeUrl: '#' } as T
   if (path === '/api/plans/current') return { id: 'demo-plan' } as T
   if (path === '/api/coach/proactive') return demoProactiveAlerts as T
   if (path === '/api/coach/weekly-summary') return demoWeeklySummaries as T

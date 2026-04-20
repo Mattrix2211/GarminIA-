@@ -1,0 +1,284 @@
+.widget {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.widgetHeader {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sportIcon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.widgetTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px;
+}
+
+.widgetSub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recommendation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.recoDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recoText {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Power zones (cycling) */
+.powerZones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  position: relative;
+}
+
+.zoneRecommended {
+  background: rgba(200, 240, 100, 0.06);
+  border: 1px solid rgba(200, 240, 100, 0.2);
+}
+
+.zoneBar {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.zoneInfo {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zoneName {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.zoneRange {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.zoneTag {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(200, 240, 100, 0.15);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* HR zones (running) */
+.hrZones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hrZoneRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hrZoneName {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.hrZoneBar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hrZoneFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.hrZoneRange {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Swimming zones */
+.swimZones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swimZone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.swimZoneDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.swimZoneLabel {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.swimZonePace {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Strength / muscle groups */
+.muscleGroupRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.muscleGroupLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.muscleGroupTag {
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  color: var(--text-secondary);
+}
+
+/* CrossFit WOD */
+.wodInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.wodBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #0f0f0f;
+  flex-shrink: 0;
+}
+
+.wodDesc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Trail */
+.trailNote {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  margin: 0;
+}
+
+/* Meta chips */
+.metaRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  flex: 1;
+  min-width: 80px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.chipIcon {
+  font-size: 1rem;
+}
+
+.chipLabel {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chipValue {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: center;
+}

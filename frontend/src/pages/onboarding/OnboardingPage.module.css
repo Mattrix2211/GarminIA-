@@ -119,12 +119,84 @@
   font-size: 1rem;
   text-align: left;
   transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .levelCard.selected {
   border-color: var(--accent);
   background: rgba(200, 240, 100, 0.08);
   color: var(--accent);
+}
+
+.levelLabel {
+  font-weight: 600;
+}
+
+.levelDesc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.levelCard.selected .levelDesc {
+  color: rgba(200, 240, 100, 0.6);
+}
+
+/* Device grid */
+.deviceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.deviceCard {
+  position: relative;
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.deviceCard.selected {
+  border-color: var(--accent);
+  background: rgba(200, 240, 100, 0.06);
+}
+
+.deviceIcon {
+  font-size: 1.5rem;
+}
+
+.deviceName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.deviceDesc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.deviceCheck {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.garminGuideBtn {
+  display: none;
 }
 
 .actions {

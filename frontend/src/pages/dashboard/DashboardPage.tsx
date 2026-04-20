@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { apiGet, apiPost } from '@/lib/api'
 import { GarminConnectButton } from '@/components/garmin/GarminConnectButton'
+import { SportWidget } from '@/components/dashboard/SportWidget'
 import styles from './DashboardPage.module.css'
 
 interface ProactiveAlert {
@@ -185,6 +186,19 @@ export function DashboardPage() {
           </div>
           <p>{status.aiRecommendation}</p>
           <Link to="/chat" className={styles.aiCta}>Parler à mon coach →</Link>
+        </section>
+      )}
+
+      {/* Widget sport du jour */}
+      {sessions.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Préparation du jour</h2>
+          <SportWidget
+            profile={profile}
+            todaySessions={sessions}
+            hrv={status?.hrv}
+            bodyBattery={status?.bodyBattery}
+          />
         </section>
       )}
 

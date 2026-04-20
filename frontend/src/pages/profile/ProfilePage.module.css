@@ -130,11 +130,84 @@
 }
 
 .deviceInfo { display: flex; align-items: center; gap: 10px; }
-.deviceIcon { font-size: 1.125rem; }
-.deviceName { font-size: 0.9375rem; }
+.deviceIcon { font-size: 1.125rem; flex-shrink: 0; }
+.deviceName { font-size: 0.9375rem; display: block; }
+.deviceSync { font-size: 0.7rem; color: var(--text-muted); display: block; }
 
 .connected { font-size: 0.8125rem; color: var(--success); font-weight: 500; }
 .comingSoon { font-size: 0.75rem; color: var(--text-muted); }
+
+.btnConnect {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  background: var(--bg-elevated);
+  transition: all 0.2s;
+}
+.btnConnect:not(:disabled):hover { border-color: var(--accent); color: var(--accent); }
+.btnConnect:disabled { opacity: 0.5; }
+
+.dedupNote {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(108, 99, 255, 0.06);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(108, 99, 255, 0.15);
+}
+.dedupNote span { color: #6c63ff; font-size: 0.85rem; flex-shrink: 0; }
+.dedupNote p { font-size: 0.75rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+/* Notifications toggle */
+.notifRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.notifInfo { display: flex; gap: 10px; align-items: center; }
+.notifIcon { font-size: 1.25rem; }
+.notifTitle { font-size: 0.9rem; color: var(--text-primary); margin: 0 0 2px; font-weight: 500; }
+.notifDesc { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+.notifDenied { font-size: 0.75rem; color: var(--warning); margin: 6px 0 0; }
+
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: background 0.25s;
+  flex-shrink: 0;
+}
+
+.toggleOn { background: var(--accent); border-color: var(--accent); }
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.25s, background 0.25s;
+}
+
+.toggleOn .toggleThumb {
+  transform: translateX(20px);
+  background: #0f0f0f;
+}
 
 /* Alertes */
 .alertsList { display: flex; flex-direction: column; gap: 8px; }

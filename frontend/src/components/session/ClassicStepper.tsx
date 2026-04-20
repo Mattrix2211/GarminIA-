@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { RestTimer } from './RestTimer'
 import { SetTracker } from './SetTracker'
 import { SessionLogger } from './SessionLogger'
+import { ExerciseFiche } from './ExerciseFiche'
 import type { SessionData } from '@/pages/session/SessionPage'
 import styles from './ClassicStepper.module.css'
 
@@ -17,6 +18,7 @@ export function ClassicStepper({ session, onFinish }: Props) {
   const [showRest, setShowRest] = useState(false)
   const [currentSetForExercise, setCurrentSetForExercise] = useState(0)
   const [setData, setSetData] = useState<Record<string, { kg: number; reps: number }[]>>({})
+  const [ficheExercise, setFicheExercise] = useState<string | null>(null)
   const startTime = useRef(Date.now())
 
   const exercises = session.exercises
@@ -104,9 +106,19 @@ export function ClassicStepper({ session, onFinish }: Props) {
         <h1 className={styles.sessionTitle}>{session.title}</h1>
       </div>
 
+      {ficheExercise && (
+        <ExerciseFiche exerciseName={ficheExercise} onClose={() => setFicheExercise(null)} />
+      )}
+
       {/* Exercice courant */}
       <div className={styles.exerciseCard}>
-        <h2 className={styles.exerciseName}>{current.name}</h2>
+        <button
+          className={styles.exerciseName}
+          onClick={() => setFicheExercise(current.name)}
+          title="Voir la fiche technique"
+        >
+          {current.name} <span className={styles.ficheHint}>ℹ</span>
+        </button>
 
         <div className={styles.exerciseMeta}>
           <div className={styles.metaBadge}>

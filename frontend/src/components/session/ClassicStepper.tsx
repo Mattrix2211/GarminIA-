@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { RestTimer } from './RestTimer'
 import { SetTracker } from './SetTracker'
 import { SessionLogger } from './SessionLogger'
-import type { SessionData, Exercise } from '@/pages/session/SessionPage'
+import type { SessionData } from '@/pages/session/SessionPage'
 import styles from './ClassicStepper.module.css'
 
 interface Props {

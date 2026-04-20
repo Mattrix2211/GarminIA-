@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useProfileStore } from '@/stores/profileStore'
-import { apiGet, apiPost, apiPatch } from '@/lib/api'
+import { apiGet, apiPatch } from '@/lib/api'
 import { GarminConnectButton } from '@/components/garmin/GarminConnectButton'
 import styles from './ProfilePage.module.css'
 
@@ -31,7 +31,7 @@ export function ProfilePage() {
 
   useEffect(() => {
     Promise.all([
-      apiGet<DeviceStatus>('/api/garmin/status').then(s => [{ provider: 'Garmin', ...s }]),
+      apiGet<{ connected: boolean; lastSync: string | null }>('/api/garmin/status').then(s => ([{ provider: 'Garmin', connected: s.connected, lastSync: s.lastSync }])),
       apiGet<ProactiveAlert[]>('/api/coach/proactive'),
     ]).then(([devs, a]) => {
       setDevices(devs as DeviceStatus[])

@@ -33,7 +33,7 @@ interface WeightEntry {
 }
 
 export function JournalPage() {
-  const { profile } = useProfileStore()
+  useProfileStore()
   const [sessions, setSessions] = useState<JournalSession[]>([])
   const [weights, setWeights] = useState<WeightEntry[]>([])
   const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([])
@@ -123,7 +123,7 @@ export function JournalPage() {
             </div>
             <WeekBar sessions={weekSessions} />
             {weekSessions.map(s => (
-              <SessionEntry key={s.id} session={s} sport={profile?.sports[0] ?? ''} />
+              <SessionEntry key={s.id} session={s} />
             ))}
             {/* Bilan hebdomadaire IA */}
             {isPastWeek && (
@@ -215,7 +215,7 @@ function WeekBar({ sessions }: { sessions: JournalSession[] }) {
   )
 }
 
-function SessionEntry({ session: s, sport }: { session: JournalSession; sport: string }) {
+function SessionEntry({ session: s }: { session: JournalSession; sport?: string }) {
   return (
     <div className={`${styles.entry} ${s.status !== 'completed' ? styles.entryPlanned : ''}`}>
       <div className={styles.entryLeft}>

@@ -19,12 +19,23 @@ interface PlanRequest {
   weekStartDate: string
 }
 
+interface PlannedExercise {
+  name: string
+  sets: number
+  reps: string
+  rest: number
+  notes?: string
+}
+
 interface PlannedSession {
   date: string
   sport: string
   title: string
   description: string
   durationMin: number
+  exercises?: PlannedExercise[]
+  isAmrap?: boolean
+  amrapDurationMin?: number
 }
 
 export async function generateWeeklyPlan(req: PlanRequest): Promise<PlannedSession[]> {
@@ -58,10 +69,12 @@ Réponds UNIQUEMENT avec un JSON valide, tableau de séances. Format exact :
 Règles :
 - Max 1 séance intense par 48h
 - Si charge aiguë élevée, prévoir plus de séances légères
-- Varier les types de séances dans la semaine
+- Pour Musculation/CrossFit : inclure "exercises" avec les exercices détaillés
+- Pour CrossFit AMRAP : mettre isAmrap=true et amrapDurationMin
 - Descriptions concrètes avec zones, allures ou charges selon le sport
 - Respecter exactement les jours disponibles
-- Date au format ISO YYYY-MM-DD`
+- Date au format ISO YYYY-MM-DD
+- Pour les séances Musculation, exemple exercises : [{"name":"Squat","sets":4,"reps":"8","rest":120},{"name":"Développé couché","sets":3,"reps":"10","rest":90}]`
 
   const message = await client.messages.create({
     model: MODEL,
@@ -101,6 +114,7 @@ export async function generateAndSavePlan(req: PlanRequest): Promise<string> {
     sport: s.sport,
     title: s.title,
     description: s.description,
+    exercises: s.exercises ?? [],
     duration_min: s.durationMin,
     status: 'planned' as const,
   }))

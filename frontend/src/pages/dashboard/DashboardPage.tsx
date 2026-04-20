@@ -6,6 +6,13 @@ import { apiGet, apiPost } from '@/lib/api'
 import { GarminConnectButton } from '@/components/garmin/GarminConnectButton'
 import styles from './DashboardPage.module.css'
 
+interface ProactiveAlert {
+  id: string
+  type: string
+  content: string
+  date: string
+}
+
 interface DailyStatus {
   hrv: number | null
   bodyBattery: number | null
@@ -36,6 +43,9 @@ export function DashboardPage() {
   const [status, setStatus] = useState<DailyStatus | null>(null)
   const [sessions, setSessions] = useState<TodaySession[]>([])
   const [garminConnected, setGarminConnected] = useState(false)
+  const [proactiveAlerts, setProactiveAlerts] = useState<ProactiveAlert[]>([])
+  const [generatingPlan, setGeneratingPlan] = useState(false)
+  const [hasPlan, setHasPlan] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -44,11 +54,15 @@ export function DashboardPage() {
       apiGet<DailyStatus>('/api/dashboard/today'),
       apiGet<TodaySession[]>('/api/dashboard/sessions-today'),
       apiGet<{ connected: boolean }>('/api/garmin/status'),
+      apiGet<ProactiveAlert[]>('/api/coach/proactive'),
+      apiGet<{ id: string } | null>('/api/plans/current'),
     ])
-      .then(([daily, todaySessions, garminStatus]) => {
+      .then(([daily, todaySessions, garminStatus, alerts, currentPlan]) => {
         setStatus(daily)
         setSessions(todaySessions)
         setGarminConnected(garminStatus.connected)
+        setProactiveAlerts(alerts.filter(a => a.type === 'proactive').slice(0, 2))
+        setHasPlan(!!currentPlan)
       })
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -57,6 +71,20 @@ export function DashboardPage() {
   const loadRatio = status?.acuteLoad && status?.chronicLoad
     ? status.acuteLoad / status.chronicLoad
     : null
+
+  async function generatePlan() {
+    setGeneratingPlan(true)
+    try {
+      await apiPost('/api/plans/generate', {})
+      const todaySessions = await apiGet<TodaySession[]>('/api/dashboard/sessions-today')
+      setSessions(todaySessions)
+      setHasPlan(true)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setGeneratingPlan(false)
+    }
+  }
 
   if (loading) return <div className={styles.loadingPulse}><div /><div /><div /></div>
 
@@ -169,6 +197,31 @@ export function DashboardPage() {
               <SessionCard key={s.id} session={s} />
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Alertes proactives */}
+      {proactiveAlerts.length > 0 && (
+        <section className={styles.section}>
+          {proactiveAlerts.map(a => (
+            <div key={a.id} className={styles.proactiveCard}>
+              <span className={styles.proactiveIcon}>💡</span>
+              <p>{a.content}</p>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Bouton générer plan */}
+      {!hasPlan && sessions.length === 0 && (
+        <section className={styles.section}>
+          <button
+            className={styles.generatePlanBtn}
+            onClick={generatePlan}
+            disabled={generatingPlan}
+          >
+            {generatingPlan ? '🤖 Génération du plan…' : '✨ Générer mon plan de la semaine'}
+          </button>
         </section>
       )}
 

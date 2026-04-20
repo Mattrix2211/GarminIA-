@@ -309,6 +309,40 @@
 
 .sessionArrow { color: var(--accent); font-size: 1rem; }
 
+/* Alertes proactives */
+.proactiveCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(108, 99, 255, 0.08);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.proactiveIcon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.proactiveCard p { font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; }
+
+/* Générer plan */
+.generatePlanBtn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(200,240,100,0.12), rgba(200,240,100,0.06));
+  border: 1px dashed rgba(200,240,100,0.4);
+  border-radius: var(--radius-md);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 20px;
+  transition: all 0.2s;
+}
+
+.generatePlanBtn:hover:not(:disabled) {
+  background: rgba(200,240,100,0.15);
+  border-style: solid;
+}
+
+.generatePlanBtn:disabled { opacity: 0.6; cursor: wait; }
+
 /* No data */
 .noData {
   background: var(--bg-card);

@@ -29,11 +29,11 @@ sessionsRouter.get('/:id', async (req: AuthRequest, res) => {
 
   if (error || !data) { res.status(404).json({ error: 'Séance introuvable' }); return }
 
-  // Récupérer les exercices depuis la description (JSON stocké) ou générer depuis le titre
+  // Utiliser la colonne exercises JSONB en priorité, fallback sur description
   let exercises = []
-  try {
-    exercises = data.description ? JSON.parse(data.description) : []
-  } catch {
+  if (Array.isArray(data.exercises) && data.exercises.length > 0) {
+    exercises = data.exercises
+  } else {
     exercises = parseExercisesFromDescription(data.description ?? '', data.sport)
   }
 

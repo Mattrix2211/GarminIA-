@@ -4,6 +4,13 @@ import { apiGet, apiPost } from '@/lib/api'
 import { useProfileStore } from '@/stores/profileStore'
 import styles from './JournalPage.module.css'
 
+interface WeeklySummary {
+  id: string
+  week_start_date: string
+  content: string
+  sessions_count: number | null
+}
+
 interface JournalSession {
   id: string
   date: string
@@ -29,16 +36,19 @@ export function JournalPage() {
   const { profile } = useProfileStore()
   const [sessions, setSessions] = useState<JournalSession[]>([])
   const [weights, setWeights] = useState<WeightEntry[]>([])
+  const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([])
   const [weightInput, setWeightInput] = useState('')
   const [loading, setLoading] = useState(true)
   const [showWeightModal, setShowWeightModal] = useState(false)
+  const [generatingSummary, setGeneratingSummary] = useState(false)
 
   useEffect(() => {
     Promise.all([
       apiGet<JournalSession[]>('/api/sessions?limit=30'),
       apiGet<WeightEntry[]>('/api/profile/weight'),
+      apiGet<WeeklySummary[]>('/api/coach/weekly-summary'),
     ])
-      .then(([s, w]) => { setSessions(s); setWeights(w) })
+      .then(([s, w, ws]) => { setSessions(s); setWeights(w); setWeeklySummaries(ws) })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -58,6 +68,21 @@ export function JournalPage() {
   if (loading) return <div className={styles.loading}>Chargement…</div>
 
   const grouped = groupByWeek(sessions)
+
+  async function generateSummary(weekStart: string) {
+    setGeneratingSummary(true)
+    try {
+      const { content } = await apiPost<{ content: string }>('/api/coach/weekly-summary/generate', { weekStart })
+      setWeeklySummaries(prev => [
+        { id: crypto.randomUUID(), week_start_date: weekStart, content, sessions_count: null },
+        ...prev.filter(s => s.week_start_date !== weekStart),
+      ])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setGeneratingSummary(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -87,18 +112,34 @@ export function JournalPage() {
       )}
 
       {/* Sessions groupées par semaine */}
-      {Object.entries(grouped).map(([week, weekSessions]) => (
-        <div key={week} className={styles.weekGroup}>
-          <div className={styles.weekHeader}>
-            <span className={styles.weekLabel}>{formatWeek(week)}</span>
-            <span className={styles.weekCount}>{weekSessions.filter(s => s.status === 'completed').length} séances</span>
+      {Object.entries(grouped).map(([week, weekSessions]) => {
+        const summary = weeklySummaries.find(s => s.week_start_date === week)
+        const isPastWeek = week < getMonday(new Date())
+        return (
+          <div key={week} className={styles.weekGroup}>
+            <div className={styles.weekHeader}>
+              <span className={styles.weekLabel}>{formatWeek(week)}</span>
+              <span className={styles.weekCount}>{weekSessions.filter(s => s.status === 'completed').length} séances</span>
+            </div>
+            <WeekBar sessions={weekSessions} />
+            {weekSessions.map(s => (
+              <SessionEntry key={s.id} session={s} sport={profile?.sports[0] ?? ''} />
+            ))}
+            {/* Bilan hebdomadaire IA */}
+            {isPastWeek && (
+              summary
+                ? <WeeklySummaryCard summary={summary} />
+                : <button
+                    className={styles.summaryBtn}
+                    onClick={() => generateSummary(week)}
+                    disabled={generatingSummary}
+                  >
+                    {generatingSummary ? '🤖 Génération…' : '📊 Générer le bilan IA de cette semaine'}
+                  </button>
+            )}
           </div>
-          <WeekBar sessions={weekSessions} />
-          {weekSessions.map(s => (
-            <SessionEntry key={s.id} session={s} sport={profile?.sports[0] ?? ''} />
-          ))}
-        </div>
-      ))}
+        )
+      })}
 
       {sessions.length === 0 && (
         <div className={styles.empty}>
@@ -198,6 +239,32 @@ function SessionEntry({ session: s, sport }: { session: JournalSession; sport: s
       {s.status === 'planned' && (
         <Link to={`/session/${s.id}`} className={styles.entryStart}>▶</Link>
       )}
+    </div>
+  )
+}
+
+function WeeklySummaryCard({ summary }: { summary: WeeklySummary }) {
+  const [expanded, setExpanded] = useState(false)
+  const lines = summary.content.split('\n').filter(Boolean)
+  const preview = lines.slice(0, 2).join(' ')
+
+  return (
+    <div className={styles.summaryCard}>
+      <div className={styles.summaryHeader} onClick={() => setExpanded(e => !e)}>
+        <span className={styles.summaryIcon}>📊</span>
+        <span>Bilan coach</span>
+        <span className={styles.summaryToggle}>{expanded ? '▲' : '▼'}</span>
+      </div>
+      {expanded
+        ? <div className={styles.summaryContent}>
+            {lines.map((line, i) => (
+              <p key={i} className={line.startsWith('**') ? styles.summaryHeading : styles.summaryText}>
+                {line.replace(/\*\*/g, '')}
+              </p>
+            ))}
+          </div>
+        : <p className={styles.summaryPreview}>{preview}…</p>
+      }
     </div>
   )
 }

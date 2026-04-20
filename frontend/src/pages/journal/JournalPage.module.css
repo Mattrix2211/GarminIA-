@@ -154,6 +154,70 @@
   line-height: 1.6;
 }
 
+/* Bilan hebdomadaire */
+.summaryBtn {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed rgba(200,240,100,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.summaryBtn:hover:not(:disabled) { background: rgba(200,240,100,0.06); }
+.summaryBtn:disabled { opacity: 0.5; cursor: wait; }
+
+.summaryCard {
+  background: rgba(200,240,100,0.04);
+  border: 1px solid rgba(200,240,100,0.15);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.summaryIcon { font-size: 0.875rem; }
+.summaryToggle { margin-left: auto; font-size: 0.6875rem; }
+
+.summaryPreview {
+  padding: 0 12px 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.summaryContent {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summaryHeading {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+.summaryText {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 /* Modal poids */
 .overlay {
   position: fixed;

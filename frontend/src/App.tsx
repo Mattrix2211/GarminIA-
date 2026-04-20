@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useProfileStore } from '@/stores/profileStore'
+import { useGarminSync } from '@/hooks/useGarminSync'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginPage } from '@/pages/auth/LoginPage'
@@ -36,6 +37,7 @@ export default function App() {
   const { init } = useAuthStore()
   const { fetchProfile } = useProfileStore()
   const { user } = useAuthStore()
+  useGarminSync()
 
   useEffect(() => {
     init()

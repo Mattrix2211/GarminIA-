@@ -1,0 +1,156 @@
+.container {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.steps {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  transition: background 0.3s;
+}
+
+.dot.active {
+  background: var(--accent);
+}
+
+.stepLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.content {
+  flex: 1;
+}
+
+.step h2 {
+  font-size: 1.75rem;
+  margin-bottom: 20px;
+}
+
+.hint {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.field input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 12px 14px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.chip.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200, 240, 100, 0.08);
+}
+
+.levelCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.levelCard {
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 1rem;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.levelCard.selected {
+  border-color: var(--accent);
+  background: rgba(200, 240, 100, 0.08);
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btnPrimary {
+  flex: 1;
+  background: var(--accent);
+  color: #0f0f0f;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+}
+
+.btnSecondary {
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1rem;
+}

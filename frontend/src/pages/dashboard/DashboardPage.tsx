@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import { apiGet } from '@/lib/api'
+import { useProfileStore } from '@/stores/profileStore'
+import { apiGet, apiPost } from '@/lib/api'
+import { GarminConnectButton } from '@/components/garmin/GarminConnectButton'
 import styles from './DashboardPage.module.css'
 
 interface DailyStatus {
@@ -12,97 +15,251 @@ interface DailyStatus {
   acuteLoad: number | null
   chronicLoad: number | null
   aiRecommendation: string | null
+  sleepDurationMin: number | null
+  sleepDeepMin: number | null
+  sleepRemMin: number | null
+  stressAvg: number | null
+}
+
+interface TodaySession {
+  id: string
+  title: string
+  sport: string
+  description: string | null
+  durationMin: number | null
+  status: string
 }
 
 export function DashboardPage() {
   const { user } = useAuthStore()
+  const { profile } = useProfileStore()
   const [status, setStatus] = useState<DailyStatus | null>(null)
+  const [sessions, setSessions] = useState<TodaySession[]>([])
+  const [garminConnected, setGarminConnected] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user) return
-    apiGet<DailyStatus>('/api/dashboard/today')
-      .then(setStatus)
+    Promise.all([
+      apiGet<DailyStatus>('/api/dashboard/today'),
+      apiGet<TodaySession[]>('/api/dashboard/sessions-today'),
+      apiGet<{ connected: boolean }>('/api/garmin/status'),
+    ])
+      .then(([daily, todaySessions, garminStatus]) => {
+        setStatus(daily)
+        setSessions(todaySessions)
+        setGarminConnected(garminStatus.connected)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user])
 
-  if (loading) return <div className={styles.loading}>Chargement…</div>
+  const loadRatio = status?.acuteLoad && status?.chronicLoad
+    ? status.acuteLoad / status.chronicLoad
+    : null
+
+  if (loading) return <div className={styles.loadingPulse}><div /><div /><div /></div>
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1>Aujourd'hui</h1>
-        <p className={styles.date}>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+        <div>
+          <h1>Bonjour{profile?.first_name ? `, ${profile.first_name}` : ''} 👋</h1>
+          <p className={styles.date}>
+            {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
+        </div>
+        {!garminConnected && (
+          <GarminConnectButton onConnected={() => setGarminConnected(true)} />
+        )}
       </header>
 
-      <section className={styles.metrics}>
-        <MetricCard label="HRV" value={status?.hrv} unit="ms" color={getHrvColor(status?.hrv)} />
-        <MetricCard label="Body Battery" value={status?.bodyBattery} unit="/100" color={getBatteryColor(status?.bodyBattery)} />
-        <MetricCard label="Sommeil" value={status?.sleepScore} unit="/100" color={getSleepColor(status?.sleepScore)} />
-        <MetricCard label="FC repos" value={status?.restingHr} unit="bpm" />
+      {/* Métriques récupération */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Récupération</h2>
+        <div className={styles.metricsGrid}>
+          <MetricCard
+            label="HRV"
+            value={status?.hrv}
+            unit="ms"
+            color={scoreColor(status?.hrv, 50, 30)}
+            icon="❤️"
+          />
+          <MetricCard
+            label="Body Battery"
+            value={status?.bodyBattery}
+            unit="/100"
+            color={scoreColor(status?.bodyBattery, 60, 30)}
+            icon="⚡"
+          />
+          <MetricCard
+            label="Sommeil"
+            value={status?.sleepScore}
+            unit="/100"
+            color={scoreColor(status?.sleepScore, 70, 50)}
+            icon="🌙"
+            sub={status?.sleepDurationMin ? `${Math.floor(status.sleepDurationMin / 60)}h${String(status.sleepDurationMin % 60).padStart(2, '0')}` : undefined}
+          />
+          <MetricCard
+            label="FC repos"
+            value={status?.restingHr}
+            unit="bpm"
+            icon="💓"
+          />
+        </div>
       </section>
 
-      {status?.acuteLoad != null && status?.chronicLoad != null && (
-        <section className={styles.loadSection}>
-          <h3>Charge d'entraînement</h3>
-          <div className={styles.loadRatio}>
-            <span>Charge aiguë / chronique</span>
-            <strong style={{ color: getLoadRatioColor(status.acuteLoad / status.chronicLoad) }}>
-              {(status.acuteLoad / status.chronicLoad).toFixed(2)}
-            </strong>
+      {/* Détail sommeil */}
+      {(status?.sleepDeepMin || status?.sleepRemMin) && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Phases de sommeil</h2>
+          <div className={styles.sleepBars}>
+            <SleepBar label="Profond" minutes={status.sleepDeepMin ?? 0} color="#6c63ff" />
+            <SleepBar label="REM" minutes={status.sleepRemMin ?? 0} color={styles.accent} />
+            <SleepBar label="Léger" minutes={(status.sleepDurationMin ?? 0) - (status.sleepDeepMin ?? 0) - (status.sleepRemMin ?? 0)} color="#555" />
           </div>
         </section>
       )}
 
+      {/* Charge d'entraînement */}
+      {loadRatio !== null && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Charge d'entraînement</h2>
+          <div className={styles.loadCard}>
+            <div className={styles.loadItem}>
+              <span>Charge aiguë (7j)</span>
+              <strong>{status?.acuteLoad?.toFixed(0)}</strong>
+            </div>
+            <div className={styles.loadDivider} />
+            <div className={styles.loadItem}>
+              <span>Charge chronique (28j)</span>
+              <strong>{status?.chronicLoad?.toFixed(0)}</strong>
+            </div>
+            <div className={styles.loadDivider} />
+            <div className={styles.loadItem}>
+              <span>Ratio</span>
+              <strong style={{ color: ratioColor(loadRatio) }}>
+                {loadRatio.toFixed(2)}
+                {loadRatio > 1.5 && ' ⚠️'}
+              </strong>
+            </div>
+          </div>
+          <LoadRatioBar ratio={loadRatio} />
+        </section>
+      )}
+
+      {/* Recommandation IA */}
       {status?.aiRecommendation && (
         <section className={styles.aiCard}>
           <div className={styles.aiHeader}>
-            <span className={styles.aiIcon}>🤖</span>
-            <span>Recommandation coach</span>
+            <span>🤖</span>
+            <span>Coach IA — Analyse du jour</span>
           </div>
           <p>{status.aiRecommendation}</p>
+          <Link to="/chat" className={styles.aiCta}>Parler à mon coach →</Link>
         </section>
+      )}
+
+      {/* Séances du jour */}
+      {sessions.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Au programme aujourd'hui</h2>
+          <div className={styles.sessionsList}>
+            {sessions.map(s => (
+              <SessionCard key={s.id} session={s} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Pas de données Garmin */}
+      {!garminConnected && !status?.hrv && (
+        <div className={styles.noData}>
+          <p>Connecte ton Garmin pour voir tes données de récupération automatiquement chaque matin.</p>
+        </div>
       )}
     </div>
   )
 }
 
-function MetricCard({ label, value, unit, color }: { label: string; value: number | null | undefined; unit: string; color?: string }) {
+function MetricCard({
+  label, value, unit, color, icon, sub,
+}: {
+  label: string; value: number | null | undefined; unit: string
+  color?: string; icon: string; sub?: string
+}) {
   return (
     <div className={styles.metric}>
-      <span className={styles.metricLabel}>{label}</span>
-      <span className={styles.metricValue} style={{ color: color || 'var(--text-primary)' }}>
+      <div className={styles.metricTop}>
+        <span className={styles.metricIcon}>{icon}</span>
+        <span className={styles.metricLabel}>{label}</span>
+      </div>
+      <span className={styles.metricValue} style={{ color: color ?? 'var(--text-primary)' }}>
         {value != null ? value : '—'}
       </span>
-      <span className={styles.metricUnit}>{unit}</span>
+      <span className={styles.metricUnit}>{value != null ? unit : ''}</span>
+      {sub && <span className={styles.metricSub}>{sub}</span>}
     </div>
   )
 }
 
-function getHrvColor(hrv: number | null | undefined) {
-  if (!hrv) return undefined
-  if (hrv >= 50) return 'var(--success)'
-  if (hrv >= 30) return 'var(--warning)'
+function SleepBar({ label, minutes, color }: { label: string; minutes: number; color: string }) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return (
+    <div className={styles.sleepBarRow}>
+      <span className={styles.sleepBarLabel}>{label}</span>
+      <div className={styles.sleepBarTrack}>
+        <div className={styles.sleepBarFill} style={{ width: `${Math.min((minutes / 480) * 100, 100)}%`, background: color }} />
+      </div>
+      <span className={styles.sleepBarTime}>{h}h{String(m).padStart(2, '0')}</span>
+    </div>
+  )
+}
+
+function LoadRatioBar({ ratio }: { ratio: number }) {
+  const pct = Math.min((ratio / 2) * 100, 100)
+  return (
+    <div className={styles.ratioBar}>
+      <div className={styles.ratioFill} style={{ width: `${pct}%`, background: ratioColor(ratio) }} />
+      <div className={styles.ratioCursor} style={{ left: `${Math.min((1 / 2) * 100, 100)}%` }} />
+    </div>
+  )
+}
+
+function SessionCard({ session }: { session: TodaySession }) {
+  return (
+    <Link to={`/session/${session.id}`} className={styles.sessionCard}>
+      <div className={styles.sessionInfo}>
+        <span className={styles.sessionSport}>{sportEmoji(session.sport)} {session.sport}</span>
+        <strong className={styles.sessionTitle}>{session.title}</strong>
+        {session.description && <p className={styles.sessionDesc}>{session.description}</p>}
+      </div>
+      <div className={styles.sessionMeta}>
+        {session.durationMin && <span>{session.durationMin} min</span>}
+        <span className={styles.sessionArrow}>→</span>
+      </div>
+    </Link>
+  )
+}
+
+function scoreColor(v: number | null | undefined, good: number, warn: number): string {
+  if (!v) return 'var(--text-secondary)'
+  if (v >= good) return 'var(--success)'
+  if (v >= warn) return 'var(--warning)'
   return 'var(--danger)'
 }
 
-function getBatteryColor(bb: number | null | undefined) {
-  if (!bb) return undefined
-  if (bb >= 60) return 'var(--success)'
-  if (bb >= 30) return 'var(--warning)'
-  return 'var(--danger)'
-}
-
-function getSleepColor(score: number | null | undefined) {
-  if (!score) return undefined
-  if (score >= 70) return 'var(--success)'
-  if (score >= 50) return 'var(--warning)'
-  return 'var(--danger)'
-}
-
-function getLoadRatioColor(ratio: number) {
-  if (ratio > 1.5) return 'var(--danger)'
-  if (ratio > 1.3) return 'var(--warning)'
+function ratioColor(r: number): string {
+  if (r > 1.5) return 'var(--danger)'
+  if (r > 1.3) return 'var(--warning)'
   return 'var(--success)'
+}
+
+function sportEmoji(sport: string): string {
+  const map: Record<string, string> = {
+    Cyclisme: '🚴', 'Course à pied': '🏃', Triathlon: '🏊', Trail: '🏔️',
+    Natation: '🏊', Musculation: '💪', CrossFit: '🔥', 'Sport collectif': '⚽',
+  }
+  return map[sport] ?? '🏅'
 }

@@ -57,10 +57,36 @@ dashboardRouter.get('/today', async (req: AuthRequest, res) => {
     hrv: garmin?.hrv_ms ?? null,
     bodyBattery: garmin?.body_battery_max ?? null,
     sleepScore: garmin?.sleep_score ?? null,
+    sleepDurationMin: garmin?.sleep_duration_min ?? null,
+    sleepDeepMin: garmin?.sleep_deep_min ?? null,
+    sleepRemMin: garmin?.sleep_rem_min ?? null,
     restingHr: garmin?.resting_hr ?? null,
+    stressAvg: garmin?.stress_avg ?? null,
     recoveryTimeHours: garmin?.recovery_time_hours ?? null,
     acuteLoad: garmin?.acute_load ?? null,
     chronicLoad: garmin?.chronic_load ?? null,
     aiRecommendation,
   })
+})
+
+dashboardRouter.get('/sessions-today', async (req: AuthRequest, res) => {
+  const today = new Date().toISOString().split('T')[0]
+
+  const { data, error } = await supabaseAdmin
+    .from('training_sessions')
+    .select('id, title, sport, description, duration_min, status')
+    .eq('user_id', req.userId!)
+    .eq('date', today)
+    .order('created_at')
+
+  if (error) { res.status(500).json({ error: error.message }); return }
+
+  res.json((data ?? []).map(s => ({
+    id: s.id,
+    title: s.title,
+    sport: s.sport,
+    description: s.description,
+    durationMin: s.duration_min,
+    status: s.status,
+  })))
 })

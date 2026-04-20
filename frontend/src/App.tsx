@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useProfileStore } from '@/stores/profileStore'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginPage } from '@/pages/auth/LoginPage'
@@ -11,15 +13,38 @@ import { ChatPage } from '@/pages/chat/ChatPage'
 import { StatsPage } from '@/pages/stats/StatsPage'
 import { JournalPage } from '@/pages/journal/JournalPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
+import { LoadingScreen } from '@/components/ui/LoadingScreen'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthStore()
-  if (loading) return <div className="loading-screen" />
+  const { profile, loading: profileLoading } = useProfileStore()
+
+  if (loading || profileLoading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (user && profile && !profile.onboarding_completed) return <Navigate to="/onboarding" replace />
+  return <>{children}</>
+}
+
+function OnboardingRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuthStore()
+  if (loading) return <LoadingScreen />
   if (!user) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 
 export default function App() {
+  const { init } = useAuthStore()
+  const { fetchProfile } = useProfileStore()
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    init()
+  }, [init])
+
+  useEffect(() => {
+    if (user) fetchProfile()
+  }, [user, fetchProfile])
+
   return (
     <BrowserRouter>
       <Routes>
@@ -29,8 +54,10 @@ export default function App() {
         </Route>
 
         <Route path="/onboarding" element={
-          <ProtectedRoute><OnboardingPage /></ProtectedRoute>
+          <OnboardingRoute><OnboardingPage /></OnboardingRoute>
         } />
+
+        <Route path="/garmin/callback" element={<GarminCallbackPage />} />
 
         <Route element={
           <ProtectedRoute><AppLayout /></ProtectedRoute>
@@ -47,4 +74,17 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   )
+}
+
+function GarminCallbackPage() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    const state = params.get('state')
+    if (code && state) {
+      window.opener?.postMessage({ type: 'GARMIN_OAUTH', code, state }, window.location.origin)
+      window.close()
+    }
+  }, [])
+  return <LoadingScreen message="Connexion Garmin en cours…" />
 }

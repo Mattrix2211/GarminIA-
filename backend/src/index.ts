@@ -9,6 +9,7 @@ import { dashboardRouter } from './routes/dashboard'
 import { chatRouter } from './routes/chat'
 import { garminRouter } from './routes/garmin'
 import { sessionsRouter } from './routes/sessions'
+import { plansRouter } from './routes/plans'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -26,6 +27,7 @@ app.use('/api/dashboard', dashboardRouter)
 app.use('/api/chat', chatRouter)
 app.use('/api/garmin', garminRouter)
 app.use('/api/sessions', sessionsRouter)
+app.use('/api/plans', plansRouter)
 
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`)

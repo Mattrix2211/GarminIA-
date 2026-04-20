@@ -1,19 +1,42 @@
+:root { --accent: #c8f064; }
+
 .page {
-  padding: 24px 16px;
+  padding: 24px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-.loading {
-  padding: 48px;
-  text-align: center;
-  color: var(--text-muted);
+.loadingPulse {
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.header h1 {
-  font-size: 2rem;
+.loadingPulse div {
+  height: 80px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  animation: pulse 1.2s ease-in-out infinite;
 }
+
+.loadingPulse div:nth-child(2) { animation-delay: 0.2s; }
+.loadingPulse div:nth-child(3) { animation-delay: 0.4s; height: 120px; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.header h1 { font-size: 1.75rem; }
 
 .date {
   color: var(--text-secondary);
@@ -22,66 +45,179 @@
   text-transform: capitalize;
 }
 
-.metrics {
+.section {}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* Métriques */
+.metricsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .metric {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
+.metricTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.metricIcon { font-size: 0.875rem; }
+
 .metricLabel {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-weight: 500;
 }
 
 .metricValue {
-  font-size: 2rem;
+  font-size: 1.875rem;
   font-family: var(--font-display);
   line-height: 1;
 }
 
 .metricUnit {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-secondary);
 }
 
-.loadSection {
+.metricSub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Sommeil */
+.sleepBars {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
-}
-
-.loadSection h3 {
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-}
-
-.loadRatio {
+  padding: 14px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sleepBarRow {
+  display: flex;
   align-items: center;
+  gap: 10px;
 }
 
-.loadRatio strong {
+.sleepBarLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.sleepBarTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sleepBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.sleepBarTime {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Charge */
+.loadCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 8px;
+}
+
+.loadItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.loadItem span {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.loadItem strong {
   font-size: 1.25rem;
+  font-family: var(--font-display);
 }
 
+.loadDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.ratioBar {
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  position: relative;
+  overflow: visible;
+}
+
+.ratioFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.ratioCursor {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--text-muted);
+  border-radius: 1px;
+  transform: translateX(-50%);
+}
+
+/* IA */
 .aiCard {
-  background: rgba(200, 240, 100, 0.06);
+  background: rgba(200, 240, 100, 0.05);
   border: 1px solid rgba(200, 240, 100, 0.2);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -94,19 +230,93 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   font-weight: 600;
-}
-
-.aiIcon {
-  font-size: 1rem;
 }
 
 .aiCard p {
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.65;
   font-size: 0.9375rem;
+}
+
+.aiCta {
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+/* Séances */
+.sessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sessionCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.sessionCard:hover { border-color: var(--accent); }
+
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sessionSport {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sessionTitle {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.sessionDesc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.sessionArrow { color: var(--accent); font-size: 1rem; }
+
+/* No data */
+.noData {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
 }

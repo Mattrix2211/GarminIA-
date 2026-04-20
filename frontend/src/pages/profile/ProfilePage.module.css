@@ -1,0 +1,163 @@
+.page {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0f0f0f;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header h1 { font-size: 1.5rem; }
+.email { color: var(--text-secondary); font-size: 0.875rem; margin-top: 2px; }
+
+.section { display: flex; flex-direction: column; gap: 12px; }
+
+.section h2 {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.infoGrid {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.infoRow:last-child { border-bottom: none; }
+
+.infoLabel { font-size: 0.875rem; color: var(--text-secondary); }
+.infoValue { font-size: 0.875rem; color: var(--text-primary); font-weight: 500; text-align: right; max-width: 60%; }
+
+/* Métriques */
+.metricsInputs { display: flex; gap: 10px; }
+
+.metricInput {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metricInput label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricInputRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metricInputRow input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 10px 8px;
+  text-align: center;
+  min-width: 0;
+}
+
+.metricInputRow input:focus { outline: none; border-color: var(--accent); }
+.metricInputRow span { font-size: 0.625rem; color: var(--text-muted); flex-shrink: 0; }
+
+.btnSave {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 12px;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.btnSave:not(:disabled):hover { border-color: var(--accent); color: var(--accent); }
+
+/* Appareils */
+.devicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.deviceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.deviceInfo { display: flex; align-items: center; gap: 10px; }
+.deviceIcon { font-size: 1.125rem; }
+.deviceName { font-size: 0.9375rem; }
+
+.connected { font-size: 0.8125rem; color: var(--success); font-weight: 500; }
+.comingSoon { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Alertes */
+.alertsList { display: flex; flex-direction: column; gap: 8px; }
+
+.alertItem {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alertDate { font-size: 0.6875rem; color: var(--text-muted); }
+.alertContent { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+
+/* Déconnexion */
+.btnSignOut {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255, 85, 85, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-size: 0.9375rem;
+}

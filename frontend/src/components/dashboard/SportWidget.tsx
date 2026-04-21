@@ -18,11 +18,23 @@ interface Props {
   todaySessions: Session[]
   hrv?: number | null
   bodyBattery?: number | null
+  minimal?: boolean
 }
 
-export function SportWidget({ profile, todaySessions, hrv, bodyBattery }: Props) {
+export function SportWidget({ profile, todaySessions, hrv, bodyBattery, minimal }: Props) {
   const primarySport = todaySessions[0]?.sport ?? profile?.sports?.[0]
   if (!primarySport) return null
+
+  if (minimal) {
+    const { color, label } = getIntensityFromRecovery(hrv, bodyBattery)
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
+        <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{primarySport}</span>
+        <span style={{ fontSize: '0.8rem', color, marginLeft: 'auto' }}>{label}</span>
+      </div>
+    )
+  }
 
   const common = { profile, hrv, bodyBattery }
 

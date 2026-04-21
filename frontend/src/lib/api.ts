@@ -3,6 +3,7 @@ import {
   DEMO_MODE, demoDaily, demoSessions, demoSessionDetail, demoMuscuSession,
   demoAmrapSession, demoJournalSessions, demoWeights, demoHrvHistory,
   demoWeeklyStats, demoExercises, demoProactiveAlerts, demoWeeklySummaries,
+  demoCalendarSessions, demoCalendarHrv,
 } from './demo'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -33,6 +34,14 @@ function demoResponse<T>(path: string): T | null {
   if (path.startsWith('/api/garmin/history')) return demoHrvHistory as T
   if (path === '/api/stats/weekly') return demoWeeklyStats as T
   if (path === '/api/stats/exercises') return demoExercises as T
+  if (path.startsWith('/api/calendar/sessions')) {
+    const month = new URLSearchParams(path.split('?')[1]).get('month') ?? ''
+    return demoCalendarSessions.filter(s => s.date.startsWith(month)) as T
+  }
+  if (path.startsWith('/api/calendar/hrv')) {
+    const month = new URLSearchParams(path.split('?')[1]).get('month') ?? ''
+    return Object.fromEntries(Object.entries(demoCalendarHrv).filter(([k]) => k.startsWith(month))) as T
+  }
   if (path === '/api/profile') return null
   if (path.startsWith('/api/sessions/demo-session-muscu')) return demoMuscuSession as T
   if (path.startsWith('/api/sessions/demo-session-amrap')) return demoAmrapSession as T

@@ -343,6 +343,358 @@
 
 .generatePlanBtn:disabled { opacity: 0.6; cursor: wait; }
 
+/* ── Edit mode button ──────────────────────────────────────────────── */
+
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.editBtn:hover { border-color: var(--accent); color: var(--accent); }
+.editBtnActive { border-color: var(--accent); color: var(--accent); background: rgba(200,240,100,0.06); }
+
+.editHint {
+  margin: -8px 16px 4px;
+  padding: 8px 12px;
+  background: rgba(200,240,100,0.05);
+  border: 1px solid rgba(200,240,100,0.15);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Edit widget wrapper ──────────────────────────────────────────── */
+
+.editWidget {
+  border: 1px dashed rgba(200,240,100,0.2);
+  border-radius: var(--radius-md);
+  margin: 0 16px 4px;
+  overflow: hidden;
+  cursor: grab;
+  transition: border-color 0.15s;
+}
+
+.editWidgetDragOver {
+  border: 2px dashed var(--accent);
+  background: rgba(200,240,100,0.04);
+}
+
+.editWidget .section {
+  padding: 12px 12px 0;
+}
+
+.editBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(200,240,100,0.04);
+  border-bottom: 1px solid rgba(200,240,100,0.12);
+}
+
+.visBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.1s;
+}
+
+.visBtnOn { color: var(--accent); background: rgba(200,240,100,0.1); }
+.visBtnOff { color: var(--text-muted); background: var(--bg-elevated); }
+
+.editLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vizPills {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.vizPill {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+
+.vizPill:active { transform: scale(0.97); }
+.vizPillActive { border-color: var(--accent); color: var(--accent); background: rgba(200,240,100,0.08); }
+
+.orderBtns {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.orderBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.1s;
+}
+
+.orderBtn:disabled { opacity: 0.2; cursor: default; }
+.orderBtn:not(:disabled):active { background: var(--bg-card); }
+
+/* ── Gauges viz ───────────────────────────────────────────────────── */
+
+.gaugesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gauge {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.gaugeLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.gaugeUnit {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+/* ── Compact metrics row ─────────────────────────────────────────── */
+
+.metricsRow {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.metricInline {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 14px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.metricInline:first-child { padding-left: 0; }
+.metricInline:last-child { padding-right: 0; border-right: none; }
+
+.metricInlineValue {
+  font-size: 1.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricInlineUnit {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.metricInlineLabel {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Sleep score viz ─────────────────────────────────────────────── */
+
+.sleepScoreCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sleepScoreNum {
+  font-size: 3rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sleepScoreOf {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+.sleepScoreDetails {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ── Load compact viz ─────────────────────────────────────────────── */
+
+.loadCompact {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loadCompactTop {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.loadCompactRatio {
+  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.loadCompactLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ── Alerts compact ─────────────────────────────────────────────── */
+
+.alertsCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alertCompactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(108, 99, 255, 0.06);
+  border: 1px solid rgba(108, 99, 255, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+.alertCompactDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #6c63ff;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.alertCompactText {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Sessions list compact ──────────────────────────────────────── */
+
+.sessionsListCompact {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sessionListRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.sessionListRow:last-child { border-bottom: none; }
+.sessionListRow:active { background: var(--bg-elevated); }
+
+.sessionListDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sessionListTitle {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionListMeta {
+  font-size: 0.75rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 /* No data */
 .noData {
   background: var(--bg-card);

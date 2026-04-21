@@ -1,0 +1,324 @@
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px 8px;
+}
+
+.monthTitle {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.yearLabel {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+.navBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+
+.navBtn:active { border-color: var(--accent); }
+
+/* ── Move banner ─────────────────────────────────────── */
+
+.moveBanner {
+  margin: 4px 12px 8px;
+  padding: 10px 14px;
+  background: rgba(200, 240, 100, 0.07);
+  border: 1px solid rgba(200, 240, 100, 0.25);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.moveBannerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.moveBannerText {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.moveBannerText strong {
+  color: var(--text-primary);
+}
+
+.cancelBtn {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.cancelBtn:active { background: var(--bg-elevated); }
+
+/* ── Weekday header ──────────────────────────────────── */
+
+.weekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 4px 12px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dayLabel {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Calendar grid ───────────────────────────────────── */
+
+.grid {
+  padding: 0 12px;
+}
+
+.weekRow {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* ── Day cell ────────────────────────────────────────── */
+
+.cell {
+  min-height: 76px;
+  padding: 6px 3px 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+}
+
+.cell:last-child { border-right: none; }
+
+.cellEmpty {
+  background: transparent;
+}
+
+.cellPast {
+  opacity: 0.7;
+}
+
+.cellToday {
+  background: rgba(200, 240, 100, 0.04);
+}
+
+.cellMovable {
+  cursor: pointer;
+}
+
+.cellMovable:active {
+  background: rgba(200, 240, 100, 0.08);
+}
+
+.cellDragOver {
+  background: rgba(200, 240, 100, 0.1);
+  outline: 2px dashed rgba(200, 240, 100, 0.4);
+  outline-offset: -2px;
+}
+
+.cellTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1px;
+}
+
+.dayNum {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1;
+  min-width: 16px;
+  text-align: center;
+}
+
+.todayBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hrvDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* ── Session pills ───────────────────────────────────── */
+
+.pills {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pill {
+  font-size: 0.6rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border-width: 1px;
+  border-style: solid;
+  line-height: 1.35;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  transition: transform 0.1s, box-shadow 0.1s;
+  font-weight: 500;
+}
+
+.pill:active { transform: scale(0.95); }
+
+.pillSelected {
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.pillDone {
+  opacity: 0.65;
+}
+
+.moreLabel {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  padding-left: 3px;
+  line-height: 1;
+}
+
+/* ── Week summary row ────────────────────────────────── */
+
+.weekStat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 2px 6px;
+}
+
+.weekBarWrap {
+  width: 64px;
+  height: 3px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.weekBarFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0.55;
+}
+
+.weekStatText {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.tssLabel {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ── Legend ──────────────────────────────────────────── */
+
+.legend {
+  display: flex;
+  gap: 12px;
+  padding: 16px 16px 0;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legendDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.legendLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* ── Loading ─────────────────────────────────────────── */
+
+.loadingWrap {
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loadingRow {
+  height: 78px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.loadingRow:nth-child(2) { animation-delay: 0.1s; }
+.loadingRow:nth-child(3) { animation-delay: 0.2s; }
+.loadingRow:nth-child(4) { animation-delay: 0.3s; }
+.loadingRow:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}

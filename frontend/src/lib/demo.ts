@@ -208,6 +208,43 @@ On maintient le volume mais on réduit l'intensité — une seule séance seuil 
   },
 ]
 
+export const demoCalendarSessions = [
+  // April 2026 — completed sessions
+  { id: 'cal-1',  date: '2026-04-01', sport: 'Cyclisme',      title: 'Endurance Z2',            durationMin: 90,  status: 'completed', tss: 67  },
+  { id: 'cal-2',  date: '2026-04-02', sport: 'Musculation',   title: 'Force — Haut du corps',   durationMin: 60,  status: 'completed', tss: null },
+  { id: 'cal-3',  date: '2026-04-03', sport: 'Course à pied', title: 'Footing 40min',            durationMin: 40,  status: 'completed', tss: 28  },
+  { id: 'cal-4',  date: '2026-04-05', sport: 'Cyclisme',      title: 'Sortie longue 3h',         durationMin: 180, status: 'completed', tss: 142 },
+  { id: 'cal-5',  date: '2026-04-07', sport: 'Natation',      title: 'Technique 45min',          durationMin: 45,  status: 'completed', tss: null },
+  { id: 'cal-6',  date: '2026-04-08', sport: 'Cyclisme',      title: 'VO2max 5×4min',            durationMin: 90,  status: 'completed', tss: 103 },
+  { id: 'cal-7',  date: '2026-04-10', sport: 'Course à pied', title: 'Allure seuil 4×10min',     durationMin: 65,  status: 'completed', tss: 74  },
+  { id: 'cal-8',  date: '2026-04-12', sport: 'Trail',         title: 'Sortie montagne 2h',       durationMin: 120, status: 'completed', tss: 88  },
+  { id: 'cal-9',  date: '2026-04-14', sport: 'Musculation',   title: 'Force — Jambes',           durationMin: 75,  status: 'completed', tss: null },
+  { id: 'cal-10', date: '2026-04-15', sport: 'Cyclisme',      title: 'Endurance fondamentale Z2', durationMin: 120, status: 'completed', tss: 89 },
+  { id: 'cal-11', date: '2026-04-17', sport: 'Natation',      title: 'Blocs vitesse 10×50m',    durationMin: 45,  status: 'completed', tss: 38  },
+  { id: 'cal-12', date: '2026-04-19', sport: 'Cyclisme',      title: 'Sortie longue 2h30',       durationMin: 150, status: 'completed', tss: 115 },
+  { id: 'cal-13', date: '2026-04-20', sport: 'Course à pied', title: 'Récupération active',      durationMin: 35,  status: 'completed', tss: 18  },
+  // April 2026 — planned sessions (from today onwards)
+  { id: 'cal-14', date: '2026-04-21', sport: 'Cyclisme',      title: 'Endurance Z2',            durationMin: 120, status: 'planned', tss: 89  },
+  { id: 'cal-15', date: '2026-04-22', sport: 'Course à pied', title: 'Footing facile',           durationMin: 40,  status: 'planned', tss: 28  },
+  { id: 'cal-16', date: '2026-04-23', sport: 'Musculation',   title: 'Force — Haut du corps',   durationMin: 60,  status: 'planned', tss: null },
+  { id: 'cal-17', date: '2026-04-24', sport: 'Cyclisme',      title: 'Seuil 3×20min',            durationMin: 90,  status: 'planned', tss: 95  },
+  { id: 'cal-18', date: '2026-04-26', sport: 'CrossFit',      title: 'Hero WOD — AMRAP 20min',  durationMin: 60,  status: 'planned', tss: null },
+  { id: 'cal-19', date: '2026-04-28', sport: 'Cyclisme',      title: 'Endurance Z2',            durationMin: 90,  status: 'planned', tss: 67  },
+  { id: 'cal-20', date: '2026-04-29', sport: 'Natation',      title: 'Technique + endurance',   durationMin: 45,  status: 'planned', tss: null },
+  // May 2026 — planned
+  { id: 'cal-21', date: '2026-05-02', sport: 'Triathlon',     title: 'Sortie longue triathlète', durationMin: 180, status: 'planned', tss: 155 },
+  { id: 'cal-22', date: '2026-05-05', sport: 'Cyclisme',      title: 'Endurance Z2',            durationMin: 90,  status: 'planned', tss: 67  },
+]
+
+export const demoCalendarHrv: Record<string, number> = {
+  '2026-04-01': 62, '2026-04-02': 58, '2026-04-03': 65, '2026-04-04': 70,
+  '2026-04-05': 55, '2026-04-06': 68, '2026-04-07': 63, '2026-04-08': 61,
+  '2026-04-09': 72, '2026-04-10': 58, '2026-04-11': 64, '2026-04-12': 56,
+  '2026-04-13': 69, '2026-04-14': 60, '2026-04-15': 58, '2026-04-16': 66,
+  '2026-04-17': 62, '2026-04-18': 67, '2026-04-19': 59, '2026-04-20': 64,
+  '2026-04-21': 58,
+}
+
 function getDateOffset(days: number): string {
   const d = new Date()
   d.setDate(d.getDate() + days)

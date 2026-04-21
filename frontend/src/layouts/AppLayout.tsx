@@ -28,18 +28,17 @@ function IcoChat({ active }: { active: boolean }) {
     </svg>
   )
 }
-function IcoJournal({ active }: { active: boolean }) {
+function IcoCalendar({ active }: { active: boolean }) {
+  const c = active ? 'var(--accent)' : 'var(--text-muted)'
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="4" y="3" width="14" height="16" rx="2"
-        stroke={active ? 'var(--accent)' : 'var(--text-muted)'}
-        strokeWidth="1.5"
+      <rect x="3" y="5" width="16" height="14" rx="2"
+        stroke={c} strokeWidth="1.5"
         fill={active ? 'rgba(200,240,100,0.08)' : 'none'}
       />
-      <path d="M7.5 8H14.5M7.5 11H14.5M7.5 14H11"
-        stroke={active ? 'var(--accent)' : 'var(--text-muted)'}
-        strokeWidth="1.5" strokeLinecap="round"
-      />
+      <path d="M3 10H19" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M7.5 3V7M14.5 3V7" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="7" y="13" width="3" height="2.5" rx="0.5" fill={active ? 'var(--accent)' : c} />
     </svg>
   )
 }
@@ -71,7 +70,7 @@ function IcoSettings({ active }: { active: boolean }) {
 const navItems = [
   { to: '/', label: 'Accueil', Icon: IcoHome },
   { to: '/chat', label: 'Coach', Icon: IcoChat },
-  { to: '/journal', label: 'Journal', Icon: IcoJournal },
+  { to: '/calendar', label: 'Calendrier', Icon: IcoCalendar },
   { to: '/stats', label: 'Stats', Icon: IcoStats },
   { to: '/settings', label: 'Réglages', Icon: IcoSettings },
 ]

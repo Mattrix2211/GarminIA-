@@ -13,6 +13,7 @@ import { SessionPage } from '@/pages/session/SessionPage'
 import { ChatPage } from '@/pages/chat/ChatPage'
 import { StatsPage } from '@/pages/stats/StatsPage'
 import { JournalPage } from '@/pages/journal/JournalPage'
+import { CalendarPage } from '@/pages/calendar/CalendarPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { LoadingScreen } from '@/components/ui/LoadingScreen'
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/journal" element={<JournalPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useProfileStore } from '@/stores/profileStore'
@@ -6,7 +6,18 @@ import { apiGet, apiPost } from '@/lib/api'
 import { GarminConnectButton } from '@/components/garmin/GarminConnectButton'
 import { SportWidget } from '@/components/dashboard/SportWidget'
 import { loadDashboardConfig, saveDashboardConfig, WIDGET_DEFS, WidgetConfig } from '@/lib/dashboardConfig'
+import { SPORT_COLORS, sportEmoji } from '@/lib/sports'
 import styles from './DashboardPage.module.css'
+
+const SECTION_TITLE: Record<string, string> = {
+  recovery: 'Récupération',
+  sleep_phases: 'Phases de sommeil',
+  load: "Charge d'entraînement",
+  ai_coach: '',
+  sport_widget: 'Préparation du jour',
+  sessions_today: "Au programme aujourd'hui",
+  proactive_alerts: '',
+}
 
 interface DailyStatus {
   hrv: number | null
@@ -128,21 +139,15 @@ export function DashboardPage() {
     })
   }
 
-  const sortedWidgets = [...widgetCfg].sort((a, b) => a.order - b.order)
+  const sortedWidgets = useMemo(
+    () => [...widgetCfg].sort((a, b) => a.order - b.order),
+    [widgetCfg]
+  )
 
   function getWidgetContent(id: string, vizType: string): React.ReactNode | null {
     switch (id) {
       case 'recovery': {
         if (!status?.hrv && !status?.bodyBattery && !status?.sleepScore && !status?.restingHr) return null
-        const grid = (
-          <div className={styles.metricsGrid}>
-            <MetricCard label="HRV" value={status?.hrv} unit="ms" color={scoreColor(status?.hrv, 50, 30)} icon="❤️" />
-            <MetricCard label="Body Battery" value={status?.bodyBattery} unit="/100" color={scoreColor(status?.bodyBattery, 60, 30)} icon="⚡" />
-            <MetricCard label="Sommeil" value={status?.sleepScore} unit="/100" color={scoreColor(status?.sleepScore, 70, 50)} icon="🌙"
-              sub={status?.sleepDurationMin ? `${Math.floor(status.sleepDurationMin / 60)}h${String(status.sleepDurationMin % 60).padStart(2, '0')}` : undefined} />
-            <MetricCard label="FC repos" value={status?.restingHr} unit="bpm" icon="💓" />
-          </div>
-        )
         if (vizType === 'gauges') {
           return (
             <div className={styles.gaugesGrid}>
@@ -163,7 +168,15 @@ export function DashboardPage() {
             </div>
           )
         }
-        return grid
+        return (
+          <div className={styles.metricsGrid}>
+            <MetricCard label="HRV" value={status?.hrv} unit="ms" color={scoreColor(status?.hrv, 50, 30)} icon="❤️" />
+            <MetricCard label="Body Battery" value={status?.bodyBattery} unit="/100" color={scoreColor(status?.bodyBattery, 60, 30)} icon="⚡" />
+            <MetricCard label="Sommeil" value={status?.sleepScore} unit="/100" color={scoreColor(status?.sleepScore, 70, 50)} icon="🌙"
+              sub={status?.sleepDurationMin ? `${Math.floor(status.sleepDurationMin / 60)}h${String(status.sleepDurationMin % 60).padStart(2, '0')}` : undefined} />
+            <MetricCard label="FC repos" value={status?.restingHr} unit="bpm" icon="💓" />
+          </div>
+        )
       }
 
       case 'sleep_phases': {
@@ -325,16 +338,6 @@ export function DashboardPage() {
     }
   }
 
-  const SECTION_TITLE: Record<string, string> = {
-    recovery: 'Récupération',
-    sleep_phases: 'Phases de sommeil',
-    load: "Charge d'entraînement",
-    ai_coach: '',
-    sport_widget: 'Préparation du jour',
-    sessions_today: "Au programme aujourd'hui",
-    proactive_alerts: '',
-  }
-
   if (loading) return <div className={styles.loadingPulse}><div /><div /><div /></div>
 
   return (
@@ -439,11 +442,6 @@ export function DashboardPage() {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-const SPORT_COLORS: Record<string, string> = {
-  Cyclisme: '#c8f064', 'Course à pied': '#ff7c5c', Natation: '#55cccc',
-  Trail: '#6c63ff', Musculation: '#ffaa33', CrossFit: '#ff5555', Triathlon: '#cc88ff',
-}
 
 function MetricCard({ label, value, unit, color, icon, sub }: {
   label: string; value: number | null | undefined; unit: string
@@ -597,10 +595,3 @@ function ratioColor(r: number): string {
   return 'var(--success)'
 }
 
-function sportEmoji(sport: string): string {
-  const map: Record<string, string> = {
-    Cyclisme: '🚴', 'Course à pied': '🏃', Triathlon: '🏊', Trail: '🏔️',
-    Natation: '🏊', Musculation: '💪', CrossFit: '🔥',
-  }
-  return map[sport] ?? '🏅'
-}

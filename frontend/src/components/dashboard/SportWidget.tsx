@@ -28,10 +28,10 @@ export function SportWidget({ profile, todaySessions, hrv, bodyBattery, minimal 
   if (minimal) {
     const { color, label } = getIntensityFromRecovery(hrv, bodyBattery)
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
-        <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{primarySport}</span>
-        <span style={{ fontSize: '0.8rem', color, marginLeft: 'auto' }}>{label}</span>
+      <div className={styles.minimal}>
+        <span className={styles.minimalDot} style={{ background: color }} />
+        <span className={styles.minimalSport}>{primarySport}</span>
+        <span className={styles.minimalIntensity} style={{ color }}>{label}</span>
       </div>
     )
   }

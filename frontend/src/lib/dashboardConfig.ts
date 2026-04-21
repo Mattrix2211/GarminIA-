@@ -70,20 +70,15 @@ const defaultConfig = (): WidgetConfig[] =>
   }))
 
 export function loadDashboardConfig(): WidgetConfig[] {
+  const defaults = defaultConfig()
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed: WidgetConfig[] = JSON.parse(raw)
-      // Merge in case new widgets were added
-      const defaults = defaultConfig()
-      const merged = defaults.map(def => {
-        const saved = parsed.find(p => p.id === def.id)
-        return saved ?? def
-      })
-      return merged
+      return defaults.map(def => parsed.find(p => p.id === def.id) ?? def)
     }
   } catch {}
-  return defaultConfig()
+  return defaults
 }
 
 export function saveDashboardConfig(config: WidgetConfig[]): void {

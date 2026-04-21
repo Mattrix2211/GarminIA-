@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { apiGet, apiPatch } from '@/lib/api'
+import { SPORT_COLORS } from '@/lib/sports'
 import styles from './CalendarPage.module.css'
 
 interface CalSession {
@@ -10,16 +11,6 @@ interface CalSession {
   durationMin: number
   status: 'planned' | 'completed'
   tss?: number | null
-}
-
-const SPORT_COLORS: Record<string, string> = {
-  Cyclisme: '#c8f064',
-  'Course à pied': '#ff7c5c',
-  Natation: '#55cccc',
-  Trail: '#6c63ff',
-  Musculation: '#ffaa33',
-  CrossFit: '#ff5555',
-  Triathlon: '#cc88ff',
 }
 
 const MONTHS_FR = [
@@ -87,28 +78,37 @@ export function CalendarPage() {
     if (m < 0) { m = 11; y-- }
     if (m > 11) { m = 0; y++ }
     setMonth(m); setYear(y)
-    setMovingSession(null)
+    setMovingSession(null); setDragSession(null)
   }
 
   async function handleMove(session: CalSession, newDate: string) {
     if (session.date === newDate) return
+    const originalDate = session.date
     setSessions(prev => prev.map(s => s.id === session.id ? { ...s, date: newDate } : s))
     setMovingSession(null)
     setDragSession(null)
-    await apiPatch(`/api/sessions/${session.id}/move`, { date: newDate })
+    try {
+      await apiPatch(`/api/sessions/${session.id}/move`, { date: newDate })
+    } catch {
+      setSessions(prev => prev.map(s => s.id === session.id ? { ...s, date: originalDate } : s))
+    }
   }
 
-  const weeks = computeWeeks(year, month)
+  const weeks = useMemo(() => computeWeeks(year, month), [year, month])
   const todayStr = ds(today)
 
-  const byDate = sessions.reduce<Record<string, CalSession[]>>((acc, s) => {
-    ;(acc[s.date] ??= []).push(s)
-    return acc
-  }, {})
+  const byDate = useMemo(() =>
+    sessions.reduce<Record<string, CalSession[]>>((acc, s) => {
+      ;(acc[s.date] ??= []).push(s)
+      return acc
+    }, {}),
+    [sessions]
+  )
+
+  const activeSession = movingSession ?? dragSession
 
   return (
     <div className={styles.page}>
-      {/* Month header */}
       <div className={styles.header}>
         <button className={styles.navBtn} onClick={() => navMonth(-1)} aria-label="Mois précédent">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -125,26 +125,23 @@ export function CalendarPage() {
         </button>
       </div>
 
-      {/* Move mode banner */}
-      {movingSession && (
+      {activeSession && (
         <div className={styles.moveBanner}>
-          <div className={styles.moveBannerDot} style={{ background: sportColor(movingSession.sport) }} />
+          <div className={styles.moveBannerDot} style={{ background: sportColor(activeSession.sport) }} />
           <span className={styles.moveBannerText}>
             Glisse ou tape une date pour déplacer{' '}
-            <strong>{movingSession.title.split(' ').slice(0, 3).join(' ')}</strong>
+            <strong>{activeSession.title.split(' ').slice(0, 3).join(' ')}</strong>
           </span>
-          <button className={styles.cancelBtn} onClick={() => setMovingSession(null)}>✕</button>
+          <button className={styles.cancelBtn} onClick={() => { setMovingSession(null); setDragSession(null) }}>✕</button>
         </div>
       )}
 
-      {/* Weekday labels */}
       <div className={styles.weekHeader}>
         {DAYS_SHORT.map((d, i) => (
           <span key={i} className={styles.dayLabel}>{d}</span>
         ))}
       </div>
 
-      {/* Calendar grid */}
       {loading ? (
         <div className={styles.loadingWrap}>
           {[...Array(5)].map((_, i) => <div key={i} className={styles.loadingRow} />)}
@@ -172,12 +169,12 @@ export function CalendarPage() {
                     const hrv = hrvMap[dateKey]
                     const isToday = dateKey === todayStr
                     const isPast = dateKey < todayStr
-
                     const isDragTarget = dragOverDate === dateKey && dragSession !== null
+
                     return (
                       <div
                         key={di}
-                        className={`${styles.cell} ${isToday ? styles.cellToday : ''} ${(movingSession || dragSession) ? styles.cellMovable : ''} ${isPast && !isToday ? styles.cellPast : ''} ${isDragTarget ? styles.cellDragOver : ''}`}
+                        className={`${styles.cell} ${isToday ? styles.cellToday : ''} ${activeSession ? styles.cellMovable : ''} ${isPast && !isToday ? styles.cellPast : ''} ${isDragTarget ? styles.cellDragOver : ''}`}
                         onClick={() => movingSession && handleMove(movingSession, dateKey)}
                         onDragOver={e => { if (dragSession) { e.preventDefault(); setDragOverDate(dateKey) } }}
                         onDragLeave={() => setDragOverDate(null)}
@@ -188,29 +185,20 @@ export function CalendarPage() {
                             {day.getDate()}
                           </span>
                           {hrv != null && (
-                            <span
-                              className={styles.hrvDot}
-                              style={{ background: hrvColor(hrv) }}
-                              title={`HRV ${hrv}ms`}
-                            />
+                            <span className={styles.hrvDot} style={{ background: hrvColor(hrv) }} title={`HRV ${hrv}ms`} />
                           )}
                         </div>
 
                         <div className={styles.pills}>
                           {daySessions.slice(0, 2).map(s => {
                             const color = sportColor(s.sport)
-                            const isSelected = movingSession?.id === s.id
+                            const isSelected = movingSession?.id === s.id || dragSession?.id === s.id
                             return (
                               <button
                                 key={s.id}
                                 draggable
                                 className={`${styles.pill} ${isSelected ? styles.pillSelected : ''} ${s.status === 'completed' ? styles.pillDone : ''}`}
-                                style={{
-                                  borderColor: color,
-                                  background: `${color}20`,
-                                  color,
-                                  cursor: 'grab',
-                                }}
+                                style={{ borderColor: color, background: `${color}20`, color, cursor: 'grab' }}
                                 onDragStart={e => {
                                   e.dataTransfer.effectAllowed = 'move'
                                   e.dataTransfer.setData('text/plain', s.id)
@@ -237,14 +225,10 @@ export function CalendarPage() {
                   })}
                 </div>
 
-                {/* Week summary */}
                 {weekMinutes > 0 && (
                   <div className={styles.weekStat}>
                     <div className={styles.weekBarWrap}>
-                      <div
-                        className={styles.weekBarFill}
-                        style={{ width: `${Math.min((weekMinutes / 480) * 100, 100)}%` }}
-                      />
+                      <div className={styles.weekBarFill} style={{ width: `${Math.min((weekMinutes / 480) * 100, 100)}%` }} />
                     </div>
                     <span className={styles.weekStatText}>
                       {h > 0 ? `${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}` : `${m}min`}
@@ -258,7 +242,6 @@ export function CalendarPage() {
         </div>
       )}
 
-      {/* Legend */}
       <div className={styles.legend}>
         {Object.entries(SPORT_COLORS).slice(0, 5).map(([sport, color]) => (
           <div key={sport} className={styles.legendItem}>

@@ -184,6 +184,55 @@ Toutes les données sont simulées — aucune API requise.
 
 ---
 
+## Home Lab — déploiement Docker
+
+Architecture : un seul port exposé. Nginx sert le frontend **et** proxifie `/api/*` vers le backend. Le backend n'est pas accessible directement depuis l'extérieur.
+
+```
+[navigateur] ──→ [nginx:80]
+                    ├── /*     → fichiers statiques React
+                    └── /api/* → backend:3001 (réseau Docker interne)
+```
+
+### 1. Configurer les variables d'environnement
+
+```bash
+# Variables pour le build frontend (à la racine)
+cp .env.docker.example .env
+# Remplir VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, PORT
+
+# Variables du backend
+cp backend/.env.example backend/.env
+# Remplir ANTHROPIC_API_KEY, SUPABASE_*, GARMIN_*, etc.
+```
+
+### 2. Lancer
+
+```bash
+docker compose up -d --build
+```
+
+L'app est disponible sur `http://ip-de-votre-machine`.
+
+### 3. Commandes utiles
+
+```bash
+docker compose logs -f backend     # logs du backend en temps réel
+docker compose logs -f frontend    # logs nginx
+docker compose restart backend     # redémarrer le backend
+docker compose down                # arrêter tout
+docker compose up -d --build       # rebuild + redémarrer après une mise à jour
+```
+
+### Mise à jour
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+---
+
 ## Scripts disponibles
 
 ```bash
@@ -223,21 +272,20 @@ Toutes les routes protégées nécessitent `Authorization: Bearer <supabase_jwt>
 
 ---
 
-## Déploiement
+## Déploiement cloud (alternative)
 
 ### Frontend → Vercel
 
 ```bash
-cd frontend
-npm run build
-# Déployer le dossier dist/ via Vercel CLI ou interface web
-# Variable d'environnement : VITE_API_URL=https://votre-backend.railway.app
+cd frontend && npm run build
+# Déployer dist/ via Vercel CLI
+# Ajouter VITE_API_URL=https://votre-backend.railway.app dans les settings Vercel
 ```
 
 ### Backend → Railway
 
 Connecter le repo GitHub à Railway, pointer sur le workspace `backend`.  
-Railway détecte automatiquement Node.js. Ajouter toutes les variables `backend/.env` dans les settings Railway.
+Railway détecte Node.js automatiquement. Ajouter les variables de `backend/.env` dans les settings Railway.
 
 ---
 

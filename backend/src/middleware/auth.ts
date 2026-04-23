@@ -1,10 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-)
+import jwt from 'jsonwebtoken'
 
 export interface AuthRequest extends Request {
   userId?: string
@@ -17,12 +12,17 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
     return
   }
 
-  const { data: { user }, error } = await supabase.auth.getUser(token)
-  if (error || !user) {
-    res.status(401).json({ error: 'Token invalide' })
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    res.status(500).json({ error: 'Configuration serveur invalide' })
     return
   }
 
-  req.userId = user.id
-  next()
+  try {
+    const payload = jwt.verify(token, secret) as { sub: string }
+    req.userId = payload.sub
+    next()
+  } catch {
+    res.status(401).json({ error: 'Token invalide ou expiré' })
+  }
 }

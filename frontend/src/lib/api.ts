@@ -1,4 +1,3 @@
-import { supabase } from './supabase'
 import {
   DEMO_MODE, demoDaily, demoSessions, demoSessionDetail, demoMuscuSession,
   demoAmrapSession, demoJournalSessions, demoWeights, demoHrvHistory,
@@ -8,11 +7,11 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const { data: { session } } = await supabase.auth.getSession()
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('access_token')
   return {
     'Content-Type': 'application/json',
-    ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 }
 
@@ -57,7 +56,7 @@ export async function apiGet<T>(path: string): Promise<T> {
     const r = demoResponse<T>(path)
     if (r !== undefined) return r as T
   }
-  const headers = await getAuthHeaders()
+  const headers = getAuthHeaders()
   const res = await fetch(`${API_URL}${path}`, { headers })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
@@ -75,7 +74,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
     if (path === '/api/profile') return { ok: true } as T
     return { ok: true } as T
   }
-  const headers = await getAuthHeaders()
+  const headers = getAuthHeaders()
   const res = await fetch(`${API_URL}${path}`, { method: 'POST', headers, body: JSON.stringify(body) })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
@@ -83,7 +82,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
 
 export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
   if (DEMO_MODE) { await delay(200); return { ok: true } as T }
-  const headers = await getAuthHeaders()
+  const headers = getAuthHeaders()
   const res = await fetch(`${API_URL}${path}`, { method: 'PATCH', headers, body: JSON.stringify(body) })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
@@ -112,7 +111,7 @@ export async function apiStreamPost(
     }
     return
   }
-  const headers = await getAuthHeaders()
+  const headers = getAuthHeaders()
   const res = await fetch(`${API_URL}${path}`, { method: 'POST', headers, body: JSON.stringify(body), signal })
   if (!res.ok) throw new Error(await res.text())
   const reader = res.body!.getReader()

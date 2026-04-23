@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import { supabase } from '@/lib/supabase'
 import { DEMO_MODE, demoProfile } from '@/lib/demo'
+import { apiGet } from '@/lib/api'
 import type { Database } from '@/types/database'
 
-type Profile = Database['public']['Tables']['user_profiles']['Row']
+export type Profile = Database['public']['Tables']['user_profiles']['Row']
 
 interface ProfileState {
   profile: Profile | null
@@ -22,14 +22,12 @@ export const useProfileStore = create<ProfileState>((set) => ({
       return
     }
     set({ loading: true })
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { set({ loading: false }); return }
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
-    set({ profile: data ?? null, loading: false })
+    try {
+      const data = await apiGet<Profile | null>('/api/profile')
+      set({ profile: data ?? null, loading: false })
+    } catch {
+      set({ loading: false })
+    }
   },
 
   setProfile: (profile) => set({ profile }),

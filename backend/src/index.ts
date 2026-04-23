@@ -4,6 +4,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import { rateLimit } from 'express-rate-limit'
 import { authMiddleware } from './middleware/auth'
+import { authRouter } from './routes/auth'
 import { profileRouter } from './routes/profile'
 import { dashboardRouter } from './routes/dashboard'
 import { chatRouter } from './routes/chat'
@@ -26,6 +27,10 @@ app.use(rateLimit({ windowMs: 60_000, max: 100 }))
 
 app.get('/health', (_req, res) => res.json({ ok: true }))
 
+// Routes publiques (avant authMiddleware)
+app.use('/api/auth', authRouter)
+
+// Routes protégées
 app.use('/api', authMiddleware)
 app.use('/api/profile', profileRouter)
 app.use('/api/dashboard', dashboardRouter)
@@ -39,7 +44,7 @@ app.use('/api/push', pushRouter)
 app.use('/api/wahoo', wahooRouter)
 app.use('/api/apple', appleRouter)
 
-// Garmin OAuth callback (hors auth middleware — redirection publique)
+// Garmin OAuth callback (redirection publique)
 app.get('/api/garmin/oauth/callback', (req, res) => {
   const { oauth_token, oauth_verifier } = req.query
   res.redirect(

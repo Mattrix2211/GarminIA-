@@ -1,9 +1,30 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-garminia}
+      POSTGRES_USER: ${POSTGRES_USER:-garminia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-garminia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - app
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     env_file: ./backend/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app
@@ -13,9 +34,8 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
         VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
+        VITE_API_URL: ${VITE_API_URL:-}
     ports:
       - "${PORT:-80}:80"
     depends_on:
@@ -23,6 +43,9 @@ services:
     restart: unless-stopped
     networks:
       - app
+
+volumes:
+  pgdata:
 
 networks:
   app:

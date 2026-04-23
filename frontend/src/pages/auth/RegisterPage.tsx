@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/authStore'
 import styles from './Auth.module.css'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const register = useAuthStore(s => s.register)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -14,12 +15,12 @@ export function RegisterPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
+    try {
+      await register(email, password)
       navigate('/onboarding')
+    } catch (err) {
+      setError((err as Error).message || 'Erreur lors de la création du compte')
+      setLoading(false)
     }
   }
 

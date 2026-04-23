@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { AuthRequest } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
+import { pool } from '../lib/db'
 import { generateAndSavePlan } from '../services/TrainingPlanService'
 
 export const plansRouter = Router()
@@ -54,18 +55,22 @@ plansRouter.post('/generate', async (req: AuthRequest, res) => {
 
 plansRouter.get('/current', async (req: AuthRequest, res) => {
   const today = new Date().toISOString().split('T')[0]
+  const userId = req.userId!
 
-  const { data: plan } = await supabaseAdmin
-    .from('training_plans')
-    .select('*, training_sessions(*)')
-    .eq('user_id', req.userId!)
-    .lte('start_date', today)
-    .gte('end_date', today)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
+  const planResult = await pool.query(
+    `SELECT * FROM training_plans WHERE user_id = $1 AND start_date <= $2 AND (end_date >= $2 OR end_date IS NULL) ORDER BY created_at DESC LIMIT 1`,
+    [userId, today],
+  )
+  const plan = planResult.rows[0] ?? null
+  if (plan) {
+    const sessionsResult = await pool.query(
+      `SELECT * FROM training_sessions WHERE plan_id = $1 AND user_id = $2 ORDER BY date`,
+      [plan.id, userId],
+    )
+    plan.training_sessions = sessionsResult.rows
+  }
 
-  res.json(plan ?? null)
+  res.json(plan)
 })
 
 plansRouter.get('/:id/sessions', async (req: AuthRequest, res) => {

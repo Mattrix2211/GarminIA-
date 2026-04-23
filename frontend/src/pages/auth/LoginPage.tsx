@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/authStore'
 import styles from './Auth.module.css'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const login = useAuthStore(s => s.login)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -14,12 +15,12 @@ export function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
+    try {
+      await login(email, password)
       navigate('/')
+    } catch (err) {
+      setError((err as Error).message || 'Identifiants incorrects')
+      setLoading(false)
     }
   }
 

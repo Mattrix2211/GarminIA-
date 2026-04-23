@@ -1,6 +1,2 @@
-import { createClient } from '@supabase/supabase-js'
-
-export const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-)
+// Remplacé par PostgreSQL local — voir src/lib/db.ts
+export { db as supabaseAdmin } from './db'

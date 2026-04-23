@@ -30,7 +30,7 @@ sessionsRouter.get('/:id', async (req: AuthRequest, res) => {
   if (error || !data) { res.status(404).json({ error: 'Séance introuvable' }); return }
 
   // Utiliser la colonne exercises JSONB en priorité, fallback sur description
-  let exercises = []
+  let exercises: unknown[] = []
   if (Array.isArray(data.exercises) && data.exercises.length > 0) {
     exercises = data.exercises
   } else {

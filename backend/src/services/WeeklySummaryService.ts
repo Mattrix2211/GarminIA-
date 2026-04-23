@@ -38,7 +38,6 @@ export async function generateWeeklySummary(userId: string, weekStart: string): 
   if (!profile) throw new Error('Profil introuvable')
 
   const completed = sessions.filter(s => s.status === 'completed')
-  const planned = sessions.filter(s => s.status === 'planned' || s.status === 'skipped')
   const avgMood = completed.filter(s => s.mood_stars).length
     ? completed.reduce((s, c) => s + (c.mood_stars ?? 0), 0) / completed.filter(s => s.mood_stars).length
     : null

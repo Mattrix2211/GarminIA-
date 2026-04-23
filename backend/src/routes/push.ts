@@ -61,11 +61,11 @@ export async function sendPushToUser(userId: string, payload: {
 
   if (!subs?.length) return
 
-  const promises = subs.map(sub =>
+  const promises = subs.map((sub: { endpoint: string; p256dh: string; auth: string }) =>
     webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
       JSON.stringify({ ...payload, icon: '/icons/icon-192.svg' })
-    ).catch(err => {
+    ).catch((err: { statusCode?: number }) => {
       if (err.statusCode === 410) {
         supabaseAdmin.from('push_subscriptions').delete()
           .eq('user_id', userId).eq('endpoint', sub.endpoint)

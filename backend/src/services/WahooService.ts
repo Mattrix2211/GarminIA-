@@ -28,7 +28,7 @@ export class WahooService {
       }),
     })
     if (!res.ok) throw new Error(`Wahoo OAuth failed: ${await res.text()}`)
-    const { access_token, refresh_token, expires_in } = await res.json()
+    const { access_token, refresh_token, expires_in } = await res.json() as { access_token: string; refresh_token: string; expires_in: number }
 
     await supabaseAdmin.from('user_devices').upsert({
       user_id: userId,
@@ -62,7 +62,7 @@ export class WahooService {
         grant_type: 'refresh_token',
       }),
     })
-    const { access_token, refresh_token, expires_in } = await res.json()
+    const { access_token, refresh_token, expires_in } = await res.json() as { access_token: string; refresh_token: string; expires_in: number }
     await supabaseAdmin.from('user_devices').update({
       access_token,
       refresh_token,
@@ -81,9 +81,9 @@ export class WahooService {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) throw new Error(`Wahoo API error: ${res.status}`)
-    const { workouts } = await res.json()
+    const { workouts } = await res.json() as { workouts?: unknown[] }
 
-    return (workouts ?? []).map((w: any) => normalizeWahooWorkout(w))
+    return (workouts ?? []).map((w) => normalizeWahooWorkout(w as WahooRawWorkout))
   }
 
   static async syncWorkouts(userId: string): Promise<{ imported: number; duplicates: number }> {
@@ -121,7 +121,18 @@ export class WahooService {
   }
 }
 
-function normalizeWahooWorkout(w: any): NormalizedActivity {
+interface WahooRawWorkout {
+  id: number | string
+  starts: string
+  minutes?: number
+  heart_rate_avg?: number | null
+  power_avg?: number | null
+  distance_accum?: number | null
+  calories_accum?: number | null
+  workout_type?: { name?: string }
+}
+
+function normalizeWahooWorkout(w: WahooRawWorkout): NormalizedActivity {
   const start = new Date(w.starts)
   return {
     externalId: String(w.id),

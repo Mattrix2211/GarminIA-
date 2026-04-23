@@ -62,7 +62,7 @@ async function garminFetch<T>(
   const header = buildAuthHeader('GET', url, accessToken, accessTokenSecret)
   const res = await fetch(url, { headers: { Authorization: header } })
   if (!res.ok) throw new Error(`Garmin API ${path}: ${res.status} ${await res.text()}`)
-  return res.json()
+  return res.json() as Promise<T>
 }
 
 export async function fetchDailyWellness(
@@ -70,7 +70,7 @@ export async function fetchDailyWellness(
   accessTokenSecret: string,
   date: string,
 ): Promise<GarminDailyWellness> {
-  const [hrv, bb, sleep, stress, training] = await Promise.allSettled([
+  const [hrv, bb, sleep, stress] = await Promise.allSettled([
     garminFetch<{ hrvSummaries?: { weeklyAvg: number }[] }>(
       `/wellness-api/rest/hrv?uploadStartTimeInSeconds=${toEpoch(date)}&uploadEndTimeInSeconds=${toEpoch(date) + 86400}`,
       accessToken, accessTokenSecret,
@@ -91,11 +91,11 @@ export async function fetchDailyWellness(
       `/wellness-api/rest/sleep?startDate=${date}&endDate=${date}`,
       accessToken, accessTokenSecret,
     ),
-    garminFetch<{ stressValuesArray?: [number, number][] }>(
+    garminFetch<{ stressValuesArray?: [number, number][]; allDayStress?: { avgStressLevel: number } }>(
       `/wellness-api/rest/dailies?startDate=${date}&endDate=${date}`,
       accessToken, accessTokenSecret,
     ),
-    garminFetch<{ metricDescriptors?: object[]; allDayStress?: { avgStressLevel: number } }>(
+    garminFetch<{ metricDescriptors?: object[] }>(
       `/training-api/rest/trainingReadiness?startDate=${date}`,
       accessToken, accessTokenSecret,
     ),

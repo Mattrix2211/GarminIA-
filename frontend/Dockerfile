@@ -15,7 +15,7 @@ ENV VITE_DEMO_MODE=$VITE_DEMO_MODE
 COPY package*.json ./
 COPY frontend/package*.json ./frontend/
 COPY shared/package*.json ./shared/
-RUN npm ci
+RUN npm install
 
 # Copier les sources
 COPY frontend/src ./frontend/src

@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
-RUN npm ci
+RUN npm install
 
 # Copier les sources
 COPY backend/src ./backend/src
@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 COPY --from=builder /app/backend/dist ./backend/dist
 

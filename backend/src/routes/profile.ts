@@ -10,11 +10,11 @@ const ProfileSchema = z.object({
   age: z.number().int().min(10).max(100).nullable().optional(),
   weightKg: z.number().min(20).max(300).nullable().optional(),
   heightCm: z.number().min(100).max(250).nullable().optional(),
-  sports: z.array(z.string()).min(1),
-  level: z.enum(['beginner', 'intermediate', 'advanced', 'competitor']),
-  goals: z.array(z.string()),
+  sports: z.array(z.string()).default([]),
+  level: z.enum(['beginner', 'intermediate', 'advanced', 'competitor']).optional(),
+  goals: z.array(z.string()).default([]),
   targetCompetitionDate: z.string().nullable().optional(),
-  devices: z.array(z.string()),
+  devices: z.array(z.string()).default([]),
 })
 
 profileRouter.post('/', async (req: AuthRequest, res) => {
@@ -29,14 +29,15 @@ profileRouter.post('/', async (req: AuthRequest, res) => {
     age: age ?? null,
     weight_kg: weightKg ?? null,
     height_cm: heightCm ?? null,
-    sports,
-    level,
-    goals,
+    sports: sports ?? [],
+    level: level ?? null,
+    goals: goals ?? [],
     target_competition_date: targetCompetitionDate ?? null,
-    equipment: devices,
+    equipment: devices ?? [],
     onboarding_completed: true,
     available_days: [1, 2, 3, 4, 5],
     max_session_duration_min: 90,
+    updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id' })
 
   if (error) { res.status(500).json({ error: error.message }); return }

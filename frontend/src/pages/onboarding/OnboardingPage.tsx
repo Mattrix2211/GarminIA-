@@ -58,14 +58,18 @@ export function OnboardingPage() {
   async function handleFinish() {
     if (!user) return
     setLoading(true)
-    await apiPost('/api/profile', {
-      userId: user.id,
-      ...form,
-      age: parseInt(form.age),
-      weightKg: parseFloat(form.weightKg),
-      heightCm: parseFloat(form.heightCm),
-    })
-    navigate('/')
+    try {
+      await apiPost('/api/profile', {
+        ...form,
+        age: form.age ? parseInt(form.age) : null,
+        weightKg: form.weightKg ? parseFloat(form.weightKg) : null,
+        heightCm: form.heightCm ? parseFloat(form.heightCm) : null,
+      })
+    } catch (e) {
+      console.error('Profil non sauvegardé:', e)
+    } finally {
+      navigate('/')
+    }
   }
 
   const hasGarmin = form.devices.includes('Garmin')

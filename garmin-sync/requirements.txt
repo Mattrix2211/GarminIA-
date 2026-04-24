@@ -1,0 +1,5 @@
+garminconnect>=0.2.19
+psycopg2-binary>=2.9.9
+flask>=3.0.0
+apscheduler>=3.10.4
+python-dotenv>=1.0.0

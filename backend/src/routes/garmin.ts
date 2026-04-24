@@ -2,83 +2,52 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { AuthRequest } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
-import {
-  getRequestToken,
-  exchangeForAccessToken,
-  saveGarminTokens,
-  getGarminTokens,
-} from '../services/GarminOAuthService'
-import { fetchDailyWellness } from '../services/GarminApiService'
 
 export const garminRouter = Router()
 
-// Étape 1 : initier l'OAuth — renvoie l'URL d'autorisation Garmin
-garminRouter.get('/oauth/start', async (req: AuthRequest, res) => {
+const SYNC_URL = process.env.GARMIN_SYNC_URL || 'http://garmin-sync:5001'
+
+async function syncFetch(path: string, body?: unknown) {
+  const res = await fetch(`${SYNC_URL}${path}`, {
+    method: body !== undefined ? 'POST' : 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    ...(body !== undefined && { body: JSON.stringify(body) }),
+  })
+  return res.json()
+}
+
+// Étape 1 : démarrer la connexion Garmin (email + mdp)
+garminRouter.post('/connect/start', async (req: AuthRequest, res) => {
+  const { email, password } = req.body
+  if (!email || !password) {
+    res.status(400).json({ error: 'email et password requis' })
+    return
+  }
   try {
-    const { token, tokenSecret, authorizeUrl } = await getRequestToken()
-
-    await supabaseAdmin.from('oauth_state').insert({
-      user_id: req.userId!,
-      provider: 'garmin',
-      oauth_token: token,
-      oauth_token_secret: tokenSecret,
-    })
-
-    res.json({ authorizeUrl })
+    const data = await syncFetch('/login/start', { userId: req.userId!, email, password })
+    res.json(data)
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }
 })
 
-// Étape 2 : callback après autorisation Garmin
-const CallbackSchema = z.object({
-  oauth_token: z.string(),
-  oauth_verifier: z.string(),
-})
-
-garminRouter.post('/oauth/callback', async (req: AuthRequest, res) => {
-  const parsed = CallbackSchema.safeParse(req.body)
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() })
-    return
-  }
-
-  const { oauth_token, oauth_verifier } = parsed.data
-
-  const { data: stateRow } = await supabaseAdmin
-    .from('oauth_state')
-    .select('oauth_token_secret, user_id')
-    .eq('oauth_token', oauth_token)
-    .eq('user_id', req.userId!)
-    .single()
-
-  if (!stateRow) {
-    res.status(400).json({ error: 'État OAuth invalide ou expiré' })
-    return
-  }
-
+// Étape 2 : fournir le code MFA
+garminRouter.post('/connect/mfa', async (req: AuthRequest, res) => {
+  const { code, email } = req.body
+  if (!code) { res.status(400).json({ error: 'code MFA requis' }); return }
   try {
-    const tokens = await exchangeForAccessToken(oauth_token, oauth_verifier, stateRow.oauth_token_secret)
-    await saveGarminTokens(req.userId!, tokens)
-
-    await supabaseAdmin.from('oauth_state').delete().eq('oauth_token', oauth_token)
-
-    // Sync immédiate des données du jour
-    const today = new Date().toISOString().split('T')[0]
-    await syncDayForUser(req.userId!, today)
-
-    res.json({ ok: true, connected: true })
+    const data = await syncFetch('/login/mfa', { userId: req.userId!, email, code })
+    res.json(data)
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }
 })
 
-// Sync manuelle d'une date
+// Sync manuelle
 garminRouter.post('/sync', async (req: AuthRequest, res) => {
-  const date = (req.body.date as string) || new Date().toISOString().split('T')[0]
   try {
-    await syncDayForUser(req.userId!, date)
-    res.json({ ok: true })
+    const data = await syncFetch(`/sync/${req.userId!}`, {})
+    res.json(data)
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }
@@ -115,7 +84,7 @@ garminRouter.get('/history', async (req: AuthRequest, res) => {
   res.json(data)
 })
 
-// Endpoint manuel pour injecter des données (dev / saisie manuelle)
+// Saisie manuelle de données
 const GarminDailySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   hrv_ms: z.number().nullable().optional(),
@@ -141,21 +110,3 @@ garminRouter.post('/manual', async (req: AuthRequest, res) => {
   if (error) { res.status(500).json({ error: error.message }); return }
   res.json({ ok: true })
 })
-
-async function syncDayForUser(userId: string, date: string): Promise<void> {
-  const tokens = await getGarminTokens(userId)
-  if (!tokens) return
-
-  const wellness = await fetchDailyWellness(tokens.accessToken, tokens.accessTokenSecret, date)
-
-  await supabaseAdmin.from('garmin_data_daily').upsert(
-    { user_id: userId, ...wellness },
-    { onConflict: 'user_id,date' },
-  )
-
-  await supabaseAdmin
-    .from('user_devices')
-    .update({ last_sync_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('provider', 'garmin')
-}

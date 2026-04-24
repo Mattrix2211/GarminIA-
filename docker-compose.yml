@@ -17,6 +17,19 @@ services:
     networks:
       - app
 
+  garmin-sync:
+    build:
+      context: ./garmin-sync
+    env_file: ./backend/.env
+    volumes:
+      - garmin-tokens:/tokens
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app
+
   backend:
     build:
       context: .
@@ -46,6 +59,7 @@ services:
 
 volumes:
   pgdata:
+  garmin-tokens:
 
 networks:
   app:

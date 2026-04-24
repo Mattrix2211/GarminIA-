@@ -1,58 +1,115 @@
 import { useState } from 'react'
-import { apiGet, apiPost } from '@/lib/api'
+import { apiPost } from '@/lib/api'
 import styles from './GarminConnectButton.module.css'
 
 interface Props {
   onConnected: () => void
 }
 
+type Step = 'idle' | 'form' | 'mfa' | 'loading'
+
 export function GarminConnectButton({ onConnected }: Props) {
-  const [loading, setLoading] = useState(false)
+  const [step, setStep] = useState<Step>('idle')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
   const [error, setError] = useState('')
 
-  async function handleConnect() {
-    setLoading(true)
+  async function handleStart(e: React.FormEvent) {
+    e.preventDefault()
     setError('')
+    setStep('loading')
     try {
-      const { authorizeUrl } = await apiGet<{ authorizeUrl: string }>('/api/garmin/oauth/start')
-
-      const popup = window.open(authorizeUrl, 'garmin-auth', 'width=600,height=700,scrollbars=yes')
-      if (!popup) { setError('Active les popups pour connecter Garmin.'); setLoading(false); return }
-
-      function onMessage(e: MessageEvent) {
-        if (e.origin !== window.location.origin) return
-        if (e.data?.type !== 'GARMIN_OAUTH') return
-        window.removeEventListener('message', onMessage)
-
-        apiPost('/api/garmin/oauth/callback', {
-          oauth_token: e.data.code,
-          oauth_verifier: e.data.state,
-        })
-          .then(() => { onConnected(); setLoading(false) })
-          .catch(err => { setError((err as Error).message); setLoading(false) })
+      const res = await apiPost<{ status: string; error?: string }>('/api/garmin/connect/start', { email, password })
+      if (res.error) { setError(res.error); setStep('form'); return }
+      if (res.status === 'mfa_required') {
+        setStep('mfa')
+      } else if (res.status === 'success') {
+        onConnected()
+        setStep('idle')
       }
-
-      window.addEventListener('message', onMessage)
-
-      const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer)
-          window.removeEventListener('message', onMessage)
-          setLoading(false)
-        }
-      }, 500)
     } catch (err) {
       setError((err as Error).message)
-      setLoading(false)
+      setStep('form')
     }
   }
 
-  return (
-    <div className={styles.wrapper}>
-      <button className={styles.btn} onClick={handleConnect} disabled={loading}>
-        {loading ? '…' : '🔗 Garmin'}
+  async function handleMfa(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setStep('loading')
+    try {
+      const res = await apiPost<{ status: string; error?: string }>('/api/garmin/connect/mfa', { email, code: mfaCode })
+      if (res.error) { setError(res.error); setStep('mfa'); return }
+      onConnected()
+      setStep('idle')
+    } catch (err) {
+      setError((err as Error).message)
+      setStep('mfa')
+    }
+  }
+
+  if (step === 'idle') {
+    return (
+      <button className={styles.btn} onClick={() => setStep('form')}>
+        🔗 Connecter
       </button>
+    )
+  }
+
+  if (step === 'loading') {
+    return <span className={styles.loading}>Connexion…</span>
+  }
+
+  if (step === 'mfa') {
+    return (
+      <form onSubmit={handleMfa} className={styles.form}>
+        <p className={styles.hint}>Code MFA (app Garmin Connect)</p>
+        <input
+          className={styles.input}
+          type="text"
+          inputMode="numeric"
+          placeholder="123456"
+          value={mfaCode}
+          onChange={e => setMfaCode(e.target.value)}
+          autoFocus
+          maxLength={8}
+        />
+        {error && <p className={styles.error}>{error}</p>}
+        <div className={styles.row}>
+          <button type="button" className={styles.btnCancel} onClick={() => setStep('idle')}>Annuler</button>
+          <button type="submit" className={styles.btn}>Valider</button>
+        </div>
+      </form>
+    )
+  }
+
+  // step === 'form'
+  return (
+    <form onSubmit={handleStart} className={styles.form}>
+      <input
+        className={styles.input}
+        type="email"
+        placeholder="Email Garmin"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        required
+        autoComplete="email"
+      />
+      <input
+        className={styles.input}
+        type="password"
+        placeholder="Mot de passe Garmin"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        required
+        autoComplete="current-password"
+      />
       {error && <p className={styles.error}>{error}</p>}
-    </div>
+      <div className={styles.row}>
+        <button type="button" className={styles.btnCancel} onClick={() => setStep('idle')}>Annuler</button>
+        <button type="submit" className={styles.btn}>Connecter</button>
+      </div>
+    </form>
   )
 }

@@ -29,3 +29,36 @@
   padding: 16px 32px;
   border-radius: var(--radius-sm);
 }
+
+.aiComment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  max-width: 360px;
+  text-align: left;
+}
+
+.aiCommentIcon { font-size: 1.25rem; }
+
+.aiCommentText {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.aiLoading {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

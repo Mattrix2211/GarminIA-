@@ -77,6 +77,14 @@ authRouter.post('/register', authLimiter, async (req, res) => {
       [userId, hashToken(refreshToken), expiresAt],
     )
 
+    // Profil minimal — sera complété via l'onboarding
+    await pool.query(
+      `INSERT INTO user_profiles (user_id, first_name, sports, goals, level, available_days, max_session_duration_min, equipment)
+       VALUES ($1, '', '{}', '{}', 'beginner', '{1,2,3,4,5}', 90, '{}')
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId],
+    ).catch(err => console.warn('Profile init skipped:', (err as Error).message))
+
     res.status(201).json({ accessToken, refreshToken, user: { id: userId, email } })
   } catch (err) {
     console.error('Register error:', err)

@@ -53,7 +53,7 @@ def login_mfa():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ── Sync ──────────────────────────────────────────────────────────────────────
+# ── Sync wellness ─────────────────────────────────────────────────────────────
 
 @app.post('/sync/<user_id>')
 def sync_user(user_id):
@@ -68,10 +68,33 @@ def sync_user(user_id):
             if wellness:
                 db.upsert_daily(user_id, d, wellness)
         db.set_sync_time(user_id)
-        logger.info("Sync OK user=%s", user_id)
+        logger.info("Sync wellness OK user=%s", user_id)
         return jsonify({'ok': True})
     except Exception as e:
-        logger.exception("Sync error user=%s", user_id)
+        logger.exception("Sync wellness error user=%s", user_id)
+        return jsonify({'error': str(e)}), 500
+
+# ── Sync activités sportives ──────────────────────────────────────────────────
+
+@app.post('/sync-activities/<user_id>')
+def sync_activities(user_id):
+    device = db.get_garmin_device(user_id)
+    if not device:
+        return jsonify({'error': 'Compte Garmin non connecté'}), 404
+    try:
+        client = gc.get_client(user_id, device['email'])
+        end   = date.today().isoformat()
+        start = (date.today() - timedelta(days=30)).isoformat()
+        activities = gc.fetch_activities(client, start, end)
+        imported = 0
+        for a in activities:
+            if db.upsert_activity(user_id, a):
+                imported += 1
+        db.update_loads_from_activities(user_id)
+        logger.info("Sync activities OK user=%s imported=%d", user_id, imported)
+        return jsonify({'ok': True, 'imported': imported})
+    except Exception as e:
+        logger.exception("Sync activities error user=%s", user_id)
         return jsonify({'error': str(e)}), 500
 
 @app.get('/status/<user_id>')
@@ -86,13 +109,21 @@ def sync_all():
     for u in db.get_all_garmin_users():
         try:
             client = gc.get_client(u['user_id'], u['email'])
+            # Wellness (récupération)
             for i in range(7):
                 d = (date.today() - timedelta(days=i)).isoformat()
                 wellness = gc.fetch_wellness(client, d)
                 if wellness:
                     db.upsert_daily(u['user_id'], d, wellness)
+            # Activités sportives
+            end   = date.today().isoformat()
+            start = (date.today() - timedelta(days=30)).isoformat()
+            activities = gc.fetch_activities(client, start, end)
+            for a in activities:
+                db.upsert_activity(u['user_id'], a)
+            db.update_loads_from_activities(u['user_id'])
             db.set_sync_time(u['user_id'])
-            logger.info("Sync OK user=%s", u['user_id'])
+            logger.info("Sync OK user=%s activities=%d", u['user_id'], len(activities))
         except Exception:
             logger.exception("Sync failed user=%s", u['user_id'])
 

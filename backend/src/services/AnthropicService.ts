@@ -88,3 +88,72 @@ export async function generateMorningRecommendation(userCtx: UserContext): Promi
 
   return (message.content[0] as { type: string; text: string }).text
 }
+
+export async function generateSessionComment(params: {
+  session: {
+    title: string
+    sport: string
+    date: string
+    durationMin: number | null
+    hrAvg?: number | null
+    powerAvgWatts?: number | null
+    pacePerKm?: string | null
+    perceivedEffort?: number | null
+    moodStars?: number | null
+    notes?: string | null
+    tss?: number | null
+    distanceMeters?: number | null
+    source: string
+  }
+  garminContext: {
+    hrv: number | null
+    bodyBattery: number | null
+    sleepScore: number | null
+    acuteLoad: number | null
+    chronicLoad: number | null
+  }
+  profile: {
+    firstName: string
+    sports: string[]
+    level: string
+    goals: string[]
+    ftpWatts?: number | null
+    vo2max?: number | null
+  }
+}): Promise<string> {
+  const { session: s, garminContext: g, profile: p } = params
+
+  const loadRatio = g.acuteLoad && g.chronicLoad
+    ? (g.acuteLoad / g.chronicLoad).toFixed(2) : null
+  const distKm = s.distanceMeters ? (s.distanceMeters / 1000).toFixed(1) : null
+
+  const systemPrompt = `Tu es le coach sportif de ${p.firstName || 'l\'athlète'}. Niveau : ${p.level}. Sports : ${p.sports.join(', ') || s.sport}.
+${p.ftpWatts ? `FTP : ${p.ftpWatts}W.` : ''}${p.vo2max ? ` VO2max : ${p.vo2max}.` : ''}
+Objectifs : ${p.goals.join(', ') || 'progression générale'}.
+Tu réponds toujours en français, en 3-5 phrases maximum, ton adapté au niveau de l'athlète. Pas de salutations.`
+
+  const userMsg = `Analyse ma séance du ${s.date} :
+- Sport : ${s.sport} — ${s.title}
+- Durée : ${s.durationMin ?? '?'} min${distKm ? ` | Distance : ${distKm} km` : ''}
+${s.hrAvg ? `- FC moyenne : ${s.hrAvg} bpm` : ''}
+${s.powerAvgWatts ? `- Puissance moyenne : ${s.powerAvgWatts}W` : ''}
+${s.pacePerKm ? `- Allure : ${s.pacePerKm}/km` : ''}
+${s.tss ? `- TSS : ${s.tss}` : ''}
+${s.perceivedEffort ? `- Effort ressenti : ${s.perceivedEffort}/10` : ''}
+${s.moodStars ? `- Humeur : ${s.moodStars}/5` : ''}
+${s.notes ? `- Notes : ${s.notes}` : ''}
+
+Données de récupération :
+- HRV : ${g.hrv ?? 'N/D'} ms | Body Battery : ${g.bodyBattery ?? 'N/D'}/100 | Sommeil : ${g.sleepScore ?? 'N/D'}/100
+${loadRatio ? `- Ratio charge aiguë/chronique : ${loadRatio}` : ''}
+
+Donne un commentaire concis sur la qualité de la séance et 1-2 conseils concrets pour la prochaine du même type.`
+
+  const msg = await client.messages.create({
+    model: MODEL,
+    max_tokens: 250,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMsg }],
+  })
+  return (msg.content[0] as { type: string; text: string }).text
+}

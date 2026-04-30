@@ -2,10 +2,31 @@ import logging
 import os
 import threading
 import time
+from datetime import date, timedelta
 from garminconnect import Garmin
 
 logger = logging.getLogger(__name__)
 TOKEN_DIR = '/tokens'
+
+SPORT_MAP = {
+    'running': 'Course',
+    'trail_running': 'Trail',
+    'treadmill_running': 'Course',
+    'cycling': 'Cyclisme',
+    'road_biking': 'Cyclisme',
+    'mountain_biking': 'Cyclisme',
+    'virtual_ride': 'Cyclisme',
+    'indoor_cycling': 'Cyclisme',
+    'pool_swimming': 'Natation',
+    'open_water_swimming': 'Natation',
+    'strength_training': 'Musculation',
+    'fitness_equipment': 'Musculation',
+    'crossfit': 'CrossFit',
+    'hiit': 'CrossFit',
+    'triathlon': 'Triathlon',
+    'walking': 'Course',
+    'other': 'Course',
+}
 
 def token_dir(user_id: str) -> str:
     d = os.path.join(TOKEN_DIR, user_id)
@@ -62,7 +83,6 @@ def start_login(user_id: str, email: str, password: str) -> str:
             return 'success'
         raise Exception(sess.error or 'Login échoué')
 
-    # Thread still running → waiting for MFA
     return 'mfa_required'
 
 def complete_mfa(user_id: str, code: str) -> None:
@@ -142,3 +162,54 @@ def fetch_wellness(client: Garmin, date_str: str) -> dict:
         pass
 
     return data
+
+def fetch_activities(client: Garmin, start_date: str, end_date: str) -> list:
+    """Récupère les activités sportives et les normalise."""
+    try:
+        raw = client.get_activities_by_date(start_date, end_date) or []
+    except Exception:
+        logger.exception("Erreur fetch_activities %s→%s", start_date, end_date)
+        return []
+
+    activities = []
+    for a in raw:
+        activity_id = a.get('activityId')
+        if not activity_id:
+            continue
+
+        type_key = (a.get('activityType') or {}).get('typeKey', 'other')
+        sport = SPORT_MAP.get(type_key, 'Course')
+
+        start_time = a.get('startTimeLocal') or a.get('startTimeGMT', '')
+        activity_date = start_time[:10] if len(start_time) >= 10 else None
+        if not activity_date:
+            continue
+
+        duration_sec = a.get('duration') or 0
+        distance_m = a.get('distance')
+        avg_hr = a.get('averageHR')
+        avg_power = a.get('averagePower')
+        avg_speed = a.get('averageSpeed')  # m/s
+        tss = a.get('trainingStressScore')
+
+        # Calcul allure pour course / trail
+        pace = None
+        if sport in ('Course', 'Trail') and avg_speed and avg_speed > 0:
+            pace_sec = 1000 / avg_speed
+            pace = f"{int(pace_sec // 60)}:{int(pace_sec % 60):02d}"
+
+        activities.append({
+            'garmin_activity_id': int(activity_id),
+            'date': activity_date,
+            'sport': sport,
+            'title': a.get('activityName') or f'{sport}',
+            'duration_min': int(duration_sec // 60) if duration_sec else None,
+            'distance_meters': float(distance_m) if distance_m else None,
+            'hr_avg': int(avg_hr) if avg_hr else None,
+            'power_avg_watts': int(avg_power) if avg_power else None,
+            'pace_per_km': pace,
+            'tss': float(tss) if tss else None,
+        })
+
+    logger.info("fetch_activities: %d activités récupérées", len(activities))
+    return activities

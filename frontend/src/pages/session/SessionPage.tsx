@@ -25,6 +25,7 @@ export interface SessionData {
   exercises: Exercise[]
   isAmrap: boolean
   amrapDurationMin?: number
+  aiComment?: string | null
 }
 
 export function SessionPage() {
@@ -55,19 +56,56 @@ export function SessionPage() {
   if (loading) return <LoadingScreen message="Chargement de la séance…" />
   if (!session) return <div className={styles.error}>Séance introuvable</div>
 
-  if (finished) return <FinishScreen session={session} onBack={() => navigate('/')} />
+  if (finished) {
+    return <FinishScreen sessionId={sessionId!} session={session} onBack={() => navigate('/')} />
+  }
 
   return session.isAmrap
     ? <AmrapMode session={session} onFinish={handleFinish} />
     : <ClassicStepper session={session} onFinish={handleFinish} />
 }
 
-function FinishScreen({ session, onBack }: { session: SessionData; onBack: () => void }) {
+function FinishScreen({
+  sessionId,
+  session,
+  onBack,
+}: {
+  sessionId: string
+  session: SessionData
+  onBack: () => void
+}) {
+  const [aiComment, setAiComment] = useState<string | null>(session.aiComment ?? null)
+
+  useEffect(() => {
+    if (aiComment) return
+    let tries = 0
+    const interval = setInterval(async () => {
+      tries++
+      try {
+        const updated = await apiGet<SessionData>(`/api/sessions/${sessionId}`)
+        if (updated.aiComment) {
+          setAiComment(updated.aiComment)
+          clearInterval(interval)
+        }
+      } catch { /* ignore */ }
+      if (tries >= 20) clearInterval(interval) // abandon après ~40s
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [sessionId, aiComment])
+
   return (
     <div className={styles.finishScreen}>
       <div className={styles.finishEmoji}>🏆</div>
       <h1>Séance terminée !</h1>
       <p>{session.title}</p>
+      {aiComment ? (
+        <div className={styles.aiComment}>
+          <span className={styles.aiCommentIcon}>🤖</span>
+          <p className={styles.aiCommentText}>{aiComment}</p>
+        </div>
+      ) : (
+        <p className={styles.aiLoading}>🤖 Analyse de ton coach en cours…</p>
+      )}
       <button className={styles.btnPrimary} onClick={onBack}>Retour à l'accueil</button>
     </div>
   )

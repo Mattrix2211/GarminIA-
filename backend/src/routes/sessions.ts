@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { AuthRequest } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
+import { pool } from '../lib/db'
+import { generateSessionComment } from '../services/AnthropicService'
 
 export const sessionsRouter = Router()
 
@@ -29,7 +31,6 @@ sessionsRouter.get('/:id', async (req: AuthRequest, res) => {
 
   if (error || !data) { res.status(404).json({ error: 'Séance introuvable' }); return }
 
-  // Utiliser la colonne exercises JSONB en priorité, fallback sur description
   let exercises: unknown[] = []
   if (Array.isArray(data.exercises) && data.exercises.length > 0) {
     exercises = data.exercises
@@ -80,16 +81,68 @@ sessionsRouter.patch('/:id/log', async (req: AuthRequest, res) => {
 
   if (error) { res.status(500).json({ error: error.message }); return }
   res.json({ ok: true })
-})
 
-const SetsSchema = z.array(z.object({
-  sessionId: z.string().uuid(),
-  exerciseName: z.string(),
-  setNumber: z.number().int(),
-  weightKg: z.number().nullable().optional(),
-  reps: z.number().int().nullable().optional(),
-  durationSec: z.number().nullable().optional(),
-}))
+  // Génération du commentaire IA en arrière-plan (non-bloquant)
+  const sessionId = req.params.id
+  const userId = req.userId!
+  setImmediate(async () => {
+    try {
+      const [sRes, pRes] = await Promise.all([
+        pool.query('SELECT * FROM training_sessions WHERE id = $1 AND user_id = $2', [sessionId, userId]),
+        pool.query('SELECT * FROM user_profiles WHERE user_id = $1', [userId]),
+      ])
+      const session = sRes.rows[0]
+      const profile = pRes.rows[0]
+      if (!session || !profile) return
+
+      const gRes = await pool.query(
+        'SELECT hrv_ms, body_battery_max, sleep_score, acute_load, chronic_load FROM garmin_data_daily WHERE user_id = $1 AND date = $2',
+        [userId, session.date],
+      )
+      const g = gRes.rows[0] || {}
+
+      const comment = await generateSessionComment({
+        session: {
+          title: session.title,
+          sport: session.sport,
+          date: session.date,
+          durationMin: session.duration_min,
+          hrAvg: session.hr_avg,
+          powerAvgWatts: session.power_avg_watts,
+          pacePerKm: session.pace_per_km,
+          perceivedEffort: session.perceived_effort,
+          moodStars: session.mood_stars,
+          notes: session.notes,
+          tss: session.tss,
+          distanceMeters: session.distance_meters,
+          source: session.source || 'plan',
+        },
+        garminContext: {
+          hrv: g.hrv_ms != null ? Math.round(Number(g.hrv_ms)) : null,
+          bodyBattery: g.body_battery_max ?? null,
+          sleepScore: g.sleep_score ?? null,
+          acuteLoad: g.acute_load != null ? Number(g.acute_load) : null,
+          chronicLoad: g.chronic_load != null ? Number(g.chronic_load) : null,
+        },
+        profile: {
+          firstName: profile.first_name || 'Athlète',
+          sports: profile.sports || [],
+          level: profile.level || 'intermediate',
+          goals: profile.goals || [],
+          ftpWatts: profile.ftp_watts,
+          vo2max: profile.vo2max,
+        },
+      })
+
+      await pool.query(
+        'UPDATE training_sessions SET ai_comment = $1, ai_comment_generated_at = NOW() WHERE id = $2',
+        [comment, sessionId],
+      )
+    } catch (err) {
+      console.error('Session comment generation failed:', (err as Error).message)
+    }
+  })
+})
 
 const MoveSchema = z.object({
   newDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD requis'),
@@ -108,6 +161,15 @@ sessionsRouter.patch('/:id/move', async (req: AuthRequest, res) => {
   if (error) { res.status(500).json({ error: error.message }); return }
   res.json({ ok: true })
 })
+
+const SetsSchema = z.array(z.object({
+  sessionId: z.string().uuid(),
+  exerciseName: z.string(),
+  setNumber: z.number().int(),
+  weightKg: z.number().nullable().optional(),
+  reps: z.number().int().nullable().optional(),
+  durationSec: z.number().nullable().optional(),
+}))
 
 sessionsRouter.post('/sets', async (req: AuthRequest, res) => {
   const parsed = SetsSchema.safeParse(req.body)
@@ -144,6 +206,10 @@ function mapSession(data: Record<string, unknown>) {
     tss: data.tss,
     notes: data.notes,
     status: data.status,
+    source: data.source ?? 'plan',
+    distanceMeters: data.distance_meters ?? null,
+    aiComment: data.ai_comment ?? null,
+    aiCommentGeneratedAt: data.ai_comment_generated_at ?? null,
   }
 }
 

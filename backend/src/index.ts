@@ -16,6 +16,7 @@ import { coachRouter } from './routes/coach'
 import { pushRouter } from './routes/push'
 import { wahooRouter } from './routes/wahoo'
 import { appleRouter } from './routes/apple'
+import { calendarRouter } from './routes/calendar'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -45,6 +46,7 @@ app.use('/api/coach', coachRouter)
 app.use('/api/push', pushRouter)
 app.use('/api/wahoo', wahooRouter)
 app.use('/api/apple', appleRouter)
+app.use('/api/calendar', calendarRouter)
 
 // Garmin OAuth callback (redirection publique)
 app.get('/api/garmin/oauth/callback', (req, res) => {

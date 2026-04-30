@@ -91,6 +91,24 @@ const SetsSchema = z.array(z.object({
   durationSec: z.number().nullable().optional(),
 }))
 
+const MoveSchema = z.object({
+  newDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD requis'),
+})
+
+sessionsRouter.patch('/:id/move', async (req: AuthRequest, res) => {
+  const parsed = MoveSchema.safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }
+
+  const { error } = await supabaseAdmin
+    .from('training_sessions')
+    .update({ date: parsed.data.newDate })
+    .eq('id', req.params.id)
+    .eq('user_id', req.userId!)
+
+  if (error) { res.status(500).json({ error: error.message }); return }
+  res.json({ ok: true })
+})
+
 sessionsRouter.post('/sets', async (req: AuthRequest, res) => {
   const parsed = SetsSchema.safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return }

@@ -72,7 +72,14 @@ export function DashboardPage() {
       apiGet<{ id: string } | null>('/api/plans/current'),
     ])
       .then(([daily, todaySessions, garminStatus, alerts, currentPlan]) => {
-        setStatus(daily)
+        setStatus({
+          ...daily,
+          hrv: daily.hrv != null ? Math.round(Number(daily.hrv)) : null,
+          bodyBattery: daily.bodyBattery != null ? Math.round(Number(daily.bodyBattery)) : null,
+          sleepScore: daily.sleepScore != null ? Math.round(Number(daily.sleepScore)) : null,
+          restingHr: daily.restingHr != null ? Math.round(Number(daily.restingHr)) : null,
+          stressAvg: daily.stressAvg != null ? Math.round(Number(daily.stressAvg)) : null,
+        })
         setSessions(todaySessions)
         setGarminConnected(garminStatus.connected)
         setProactiveAlerts(alerts.filter(a => a.type === 'proactive').slice(0, 2))

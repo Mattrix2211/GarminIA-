@@ -55,11 +55,20 @@ export function StatsPage() {
 
   const isMusculation = profile?.sports.includes('Musculation') || profile?.sports.includes('CrossFit')
 
+  const hasAnyData = weekly.length > 0 || hrv.length > 0 || weights.length > 0 || exercises.length > 0
+
   if (loading) return <div className={styles.loading}>Chargement…</div>
 
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Statistiques</h1>
+
+      {!hasAnyData && (
+        <div className={styles.emptyState}>
+          <p>Pas encore assez de données.</p>
+          <p>Connecte ton Garmin et complète quelques séances — tes stats apparaîtront ici !</p>
+        </div>
+      )}
 
       {/* Séances par semaine */}
       {weekly.length > 0 && (
@@ -122,7 +131,13 @@ export function StatsPage() {
       )}
 
       {/* HRV sur 30 jours */}
-      {hrv.filter(d => d.hrv).length > 3 && (
+      {hrv.filter(d => d.hrv).length === 0 && hasAnyData && (
+        <section className={styles.section}>
+          <h2>HRV — 30 jours</h2>
+          <p className={styles.emptySection}>Pas encore de données HRV — reviens après quelques nuits synchronisées.</p>
+        </section>
+      )}
+      {hrv.filter(d => d.hrv).length > 0 && (
         <section className={styles.section}>
           <h2>HRV — 30 jours</h2>
           <ResponsiveContainer width="100%" height={140}>
